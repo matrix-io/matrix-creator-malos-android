@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ButtonContainer"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingLeft="5dip">
+
+    <TextView
+        android:id="@+id/lightPercentValue"
+        style="@style/DemoKitControlLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center|top"
+        android:text="Buttons"></TextView>
+
+    <LinearLayout
+        android:id="@+id/ButtonContainerInternal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="5dip"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/Button1"
+            style="@style/DemoKitButtonDisplay"
+            android:background="@null"
+            android:src="@drawable/indicator_button1_off_noglow"></ImageButton>
+
+        <ImageButton
+            android:id="@+id/Button2"
+            style="@style/DemoKitButtonDisplay"
+            android:background="@null"
+            android:src="@drawable/indicator_button2_off_noglow"></ImageButton>
+
+        <ImageButton
+            android:id="@+id/Button3"
+            style="@style/DemoKitButtonDisplay"
+            android:background="@null"
+            android:src="@drawable/indicator_button3_off_noglow"></ImageButton>
+
+        <ImageButton
+            android:id="@+id/Button4"
+            style="@style/DemoKitButtonDisplay"
+            android:background="@null"
+            android:src="@drawable/indicator_button_capacitive_off_noglow"></ImageButton>
+    </LinearLayout>
+</LinearLayout>
+

@@ -4,28 +4,89 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background_holo_dark"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="admobilize.matrix.malosclient.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:id="@+id/textView" />
+    <RelativeLayout
+        android:id="@+id/rl_main_imu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <ToggleButton
-        android:text="ToggleButton"
+        <include
+            android:id="@+id/TempLightContainer_ref"
+            layout="@layout/templightcontainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/lightPercentValue"
+        style="@style/DemoKitControlLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="29dp"
-        android:layout_marginStart="29dp"
-        android:layout_marginTop="48dp"
-        android:id="@+id/toggleButton"
-        android:checked="true" />
+        android:layout_below="@+id/rl_main_imu"
+        android:layout_weight="1"
+        android:gravity="center|top"
+        android:text="GPIO Input/output"></TextView>
+
+    <LinearLayout
+        android:id="@+id/ll_main_buttons_line"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lightPercentValue"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="5dip"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/Button1"
+            style="@style/DemoKitButtonDisplay"
+            android:background="@null"
+            android:src="@drawable/indicator_button1_off_noglow"></ImageButton>
+
+        <ToggleButton
+            android:id="@+id/toggleButton"
+            style="@style/DemoKitRelayButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textOff="@string/off"
+            android:textOn="@string/on"></ToggleButton>
+
+        <ImageButton
+            android:id="@+id/Button4"
+            style="@style/DemoKitButtonDisplay"
+            android:background="@null"
+            android:src="@drawable/indicator_button_capacitive_off_noglow"></ImageButton>
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ll_main_buttons_line">
+
+        <include
+            android:id="@+id/leds1"
+            layout="@layout/color_sliders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+
+    </FrameLayout>
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+    </FrameLayout>
+
+
 </RelativeLayout>

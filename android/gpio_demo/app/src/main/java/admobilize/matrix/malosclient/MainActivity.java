@@ -1,8 +1,7 @@
 package admobilize.matrix.malosclient;
 
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,7 +9,7 @@ import android.widget.CompoundButton;
 import android.widget.ToggleButton;
 
 import org.zeromq.ZMQ;
-import matrix_malos.Driver;
+
 import matrix_malos.Driver.GpioParams.Builder;
 
 import static matrix_malos.Driver.*;
@@ -20,7 +19,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private ZMQ.Context zmqcontext;
-    private ZMQ.Socket socket;
+    private ZMQ.Socket config_socket;
+    private ZMQ.Socket sub_socket;
+    private Drawable mOffBackground;
+    private Drawable mOnBackground;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+//        mOffBackground = getDrawable(R.drawable.toggle_button_off_holo_dark);
+//		mOnBackground = getDrawable(R.drawable.toggle_button_on_holo_dark);
     }
 
     public void sendOuputValue(int pin,int value){
@@ -49,12 +54,14 @@ public class MainActivity extends AppCompatActivity {
         new ZeroMQSend(DriverConfig.newBuilder().setGpio(gpioParams)).execute();
     }
 
-    public class ZeroMQContext extends AsyncTask<Void, Void, Void> {
+    public class ZeroMQConnect extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void...voids) {
             zmqcontext = ZMQ.context(1);
-            socket = zmqcontext.socket(ZMQ.PUSH);
-            socket.connect("tcp://10.0.0.167:20049");
+            config_socket = zmqcontext.socket(ZMQ.PUSH);
+            config_socket.connect(Config.MALOS_GPIO_CONFIG);
+            sub_socket = zmqcontext.socket(ZMQ.SUB);
+
             return null;
         }
     }
@@ -68,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            socket.send(config.build().toByteArray());
+            config_socket.send(config.build().toByteArray());
             Log.d(TAG,"ZeroMQMessageTask doInBackground result");
             return null;
         }
@@ -76,13 +83,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        new ZeroMQContext().execute();
+        new ZeroMQConnect().execute();
         super.onResume();
     }
 
     @Override
     protected void onStop() {
-        socket.close();
+        config_socket.close();
         zmqcontext.term();
         super.onStop();
     }
