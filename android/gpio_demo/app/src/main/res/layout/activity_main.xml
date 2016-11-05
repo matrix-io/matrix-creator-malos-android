@@ -67,6 +67,7 @@
     </LinearLayout>
 
     <FrameLayout
+        android:id="@+id/fl_main_leds"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/ll_main_buttons_line">
@@ -76,14 +77,18 @@
             layout="@layout/color_sliders"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-
     </FrameLayout>
 
 
     <FrameLayout
+        android:layout_below="@+id/fl_main_leds"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <include
+            layout="@layout/joycontainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
 
     </FrameLayout>

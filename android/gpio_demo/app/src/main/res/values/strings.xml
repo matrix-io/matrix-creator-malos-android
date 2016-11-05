@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Matrix Malos Client</string>
+    <string name="app_name">Matrix Malos Demo</string>
 
     <string name="input">In</string>
 	<string name="output">Out</string>
