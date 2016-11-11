@@ -79,33 +79,6 @@ public class MalosDevice {
         }
     }
 
-    private class ZeroMQSub extends AsyncTask<Void,Void,Void>{
-
-        private final OnSubscriptionCallBack cb;
-
-        public ZeroMQSub(OnSubscriptionCallBack cb) {
-            this.cb=cb;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            ZMQ.Context sub_context = ZMQ.context(1);
-            sub_socket = sub_context.socket(ZMQ.SUB);
-            sub_socket.connect(driver.getSubPort());
-            sub_socket.subscribe("".getBytes());
-
-            while(true) {
-                try {
-                    cb.onReceiveData(sub_socket.recv());
-                    return null;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        }
-    }
-
     private class ZeroMQSubscription implements Runnable {
 
         private final OnSubscriptionCallBack cb;
