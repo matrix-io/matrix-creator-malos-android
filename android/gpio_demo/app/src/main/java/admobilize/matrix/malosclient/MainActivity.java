@@ -14,7 +14,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import matrix_malos.Driver;
 import matrix_malos.Driver.GpioParams.Builder;
 
 import static admobilize.matrix.malosclient.MalosDevice.*;
@@ -172,9 +171,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         gpio.connect();
-        gpio.subscription(onGpioInputCallBack);
-        humidity.subscription(onHumidityDataCallBack);
-        uv.subscription(onUVDataCallBack);
+        gpio.subs(onGpioInputCallBack);
+        humidity.subs(onHumidityDataCallBack);
+        uv.subs(onUVDataCallBack);
         timer = new Timer();
         startTimer();
         super.onResume();

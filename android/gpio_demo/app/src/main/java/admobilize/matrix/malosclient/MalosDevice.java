@@ -5,8 +5,6 @@ import android.util.Log;
 
 import org.zeromq.ZMQ;
 
-import matrix_malos.Driver;
-
 import static matrix_malos.Driver.*;
 
 /**
@@ -39,7 +37,7 @@ public class MalosDevice {
         new ZeroMQConfig(config).execute();
     }
 
-    public void subscription (OnSubscriptionCallBack cb){
+    public void subs (OnSubscriptionCallBack cb){
          new Thread(new ZeroMQSubscription(cb)).start();
 //        new ZeroMQSub(cb).execute();
     }
@@ -49,7 +47,7 @@ public class MalosDevice {
     }
 
     public void disconnect() {
-        new ZeroMQDisonnect().execute();
+        new ZeroMQDisconnect().execute();
     }
 
     // TODO: unify Connect and Config ??
@@ -74,7 +72,11 @@ public class MalosDevice {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            config_socket.send(config.build().toByteArray());
+            try {
+                config_socket.send(config.build().toByteArray());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return null;
         }
     }
@@ -106,7 +108,7 @@ public class MalosDevice {
         }
     }
 
-    private class ZeroMQDisonnect extends AsyncTask<Void, Void, Void> {
+    private class ZeroMQDisconnect extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void...voids) {
