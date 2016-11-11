@@ -7,7 +7,7 @@
     android:paddingLeft="5dip">
 
     <TextView
-        android:id="@+id/lightPercentValue"
+        android:id="@+id/tv_sensor_uv_percent_value"
         style="@style/DemoKitControlLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

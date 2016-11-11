@@ -14,72 +14,121 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tempLabel"
+            android:id="@+id/tv_sensor_temp_label"
             style="@style/DemoKitControlLabel"
             android:layout_weight="1"
             android:gravity="center"
             android:text="Temp"></TextView>
 
         <TextView
-            android:id="@+id/tempValue"
+            android:id="@+id/tv_sensor_temp_value"
             style="@style/DemoKitMeasurement"
             android:layout_weight="1"
             android:text="45º"></TextView>
 
-        <TextView
-            android:id="@+id/hiddenPercentValue"
-            style="@style/DemoKitControlLabel"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text=" "></TextView>
     </LinearLayout>
 
+
     <LinearLayout
-        android:id="@+id/LightContainer"
+        android:id="@+id/HumidityContainer"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/lightPercentLabel"
+            android:id="@+id/tv_sensor_humidity_label"
             style="@style/DemoKitControlLabel"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Light"></TextView>
+            android:text="Hum"></TextView>
+
+        <RelativeLayout
+            android:id="@+id/ll_sensor_humidity_percent"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <TextView
+                android:id="@+id/tv_sensor_humidity_value"
+                style="@style/DemoKitMeasurement"
+                android:text="12"></TextView>
+
+            <TextView
+                android:id="@+id/tv_sensor_humidity_percent_suffix"
+                style="@style/DemoKitMeasurementSuffix"
+                android:layout_toRightOf="@id/tv_sensor_humidity_value"
+                android:gravity="bottom"
+                android:layout_alignBottom="@+id/tv_sensor_humidity_value"
+                android:paddingBottom="5dp"
+                android:text="%"></TextView>
+        </RelativeLayout>
 
         <LinearLayout
-            android:id="@+id/lightPercentValueContainer"
+            android:id="@+id/ll_sensor_humidity_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_sensor_humidity_detail"
+                style="@style/DemoKitControlLightLowerLabel"
+                android:text="board "></TextView>
+
+            <TextView
+                style="@style/DemoKitControlLightLowerLabelConst"
+                android:text=" sensor"></TextView>
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/ll_sensor_uv"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_sensor_label"
+            style="@style/DemoKitControlLabel"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="UV"></TextView>
+
+        <LinearLayout
+            android:id="@+id/ll_sensor_uv_percent"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/lightPercentValue"
+                android:id="@+id/tv_sensor_uv_percent_value"
                 style="@style/DemoKitMeasurement"
                 android:text="23"></TextView>
 
             <TextView
-                android:id="@+id/lightPercentSuffix"
+                android:id="@+id/tv_sensor_uv_percent_suffix"
                 style="@style/DemoKitMeasurementSuffix"
                 android:gravity="top"
                 android:text="%"></TextView>
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/lightRawValueContainer"
+            android:id="@+id/ll_sensor_uv_detail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/lightRawValue"
+                android:id="@+id/tv_sensor_uv_detail"
                 style="@style/DemoKitControlLightLowerLabel"
                 android:text="200"></TextView>
 
             <TextView
                 style="@style/DemoKitControlLightLowerLabelConst"
-                android:text="/1024"></TextView>
+                android:text=" radation"></TextView>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

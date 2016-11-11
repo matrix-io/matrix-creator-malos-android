@@ -26,7 +26,7 @@
     </RelativeLayout>
 
     <TextView
-        android:id="@+id/lightPercentValue"
+        android:id="@+id/tv_sensor_uv_percent_value"
         style="@style/DemoKitControlLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
         android:id="@+id/ll_main_buttons_line"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/lightPercentValue"
+        android:layout_below="@+id/tv_sensor_uv_percent_value"
         android:layout_gravity="center_vertical"
         android:layout_marginTop="5dip"
         android:layout_weight="1"

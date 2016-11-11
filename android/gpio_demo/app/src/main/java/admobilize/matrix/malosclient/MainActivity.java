@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -36,6 +37,10 @@ public class MainActivity extends AppCompatActivity {
     private MalosDevice uv;
     private Drawable mOffImage;
     private Drawable mOnImage;
+    private TextView uv_value;
+    private TextView uv_risk;
+    private TextView temp_value;
+    private TextView humi_value;
 
 
     @Override
@@ -50,6 +55,12 @@ public class MainActivity extends AppCompatActivity {
         outputButton = (ToggleButton) findViewById(R.id.tb_main_ouput);
         inputButton = (ImageButton) findViewById(R.id.ib_main_input);
         outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
+
+        uv_value = (TextView)findViewById(R.id.tv_sensor_uv_percent_value);
+        uv_risk = (TextView)findViewById(R.id.tv_sensor_uv_detail);
+        temp_value = (TextView)findViewById(R.id.tv_sensor_temp_value);
+        humi_value = (TextView)findViewById(R.id.tv_sensor_humidity_value);
+
 
         mOffBackground = getResources().getDrawable(R.drawable.toggle_button_off_holo_dark);
 		mOnBackground = getResources().getDrawable(R.drawable.toggle_button_on_holo_dark);
@@ -96,26 +107,42 @@ public class MainActivity extends AppCompatActivity {
 
     private OnSubscriptionCallBack onHumidityDataCallBack = new OnSubscriptionCallBack() {
         @Override
-        public void onReceiveData(byte[] data) {
-            try {
-                Humidity humidity = Humidity.parseFrom(data);
-                if(DEBUG)Log.d(TAG,"onHumidityDataCallBack value: "+humidity.getHumidity());
-            } catch (InvalidProtocolBufferException e) {
-                e.printStackTrace();
-            }
+        public void onReceiveData(final byte[] data) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Humidity humidity = Humidity.parseFrom(data);
+                        if(DEBUG)Log.d(TAG,"onHumidityDataCallBack humidity: "+humidity.getHumidity());
+                        if(DEBUG)Log.d(TAG,"onHumidityDataCallBack temperature: "+humidity.getTemperature());
+                        temp_value.setText(""+((int)(humidity.getTemperature()*10))/10.0f+"º");
+                        humi_value.setText(""+((int)(humidity.getHumidity()*10))/10.0f);
+                    } catch (InvalidProtocolBufferException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
         }
     };
 
     private OnSubscriptionCallBack onUVDataCallBack = new OnSubscriptionCallBack() {
         @Override
-        public void onReceiveData(byte[] data) {
-            try {
-                UV uv = UV.parseFrom(data);
-                if(DEBUG)Log.d(TAG,"onUVData OmsRisk: "+uv.getOmsRisk());
-                if(DEBUG)Log.d(TAG,"onUVData UvIndex: "+uv.getUvIndex());
-            } catch (InvalidProtocolBufferException e) {
-                e.printStackTrace();
-            }
+        public void onReceiveData(final byte[] data) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        UV uv = UV.parseFrom(data);
+                        if(DEBUG)Log.d(TAG,"onUVData OmsRisk: "+uv.getOmsRisk());
+                        if(DEBUG)Log.d(TAG,"onUVData UvIndex: "+uv.getUvIndex());
+                        uv_value.setText(""+Integer.parseInt(""+(int)(uv.getUvIndex()*1000)));
+                        uv_risk.setText(uv.getOmsRisk());
+                    } catch (InvalidProtocolBufferException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
     };
 
