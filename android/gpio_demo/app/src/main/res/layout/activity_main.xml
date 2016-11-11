@@ -46,13 +46,13 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/Button1"
+            android:id="@+id/ib_main_input"
             style="@style/DemoKitButtonDisplay"
             android:background="@null"
             android:src="@drawable/indicator_button1_off_noglow"></ImageButton>
 
         <ToggleButton
-            android:id="@+id/toggleButton"
+            android:id="@+id/tb_main_ouput"
             style="@style/DemoKitRelayButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -81,9 +81,9 @@
 
 
     <FrameLayout
-        android:layout_below="@+id/fl_main_leds"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/fl_main_leds">
 
         <include
             layout="@layout/joycontainer"

@@ -1,12 +1,19 @@
 package admobilize.matrix.malosclient;
 
+import android.graphics.drawable.Drawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.ToggleButton;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import matrix_malos.Driver;
 import matrix_malos.Driver.GpioParams.Builder;
 
 import static admobilize.matrix.malosclient.MalosDevice.*;
@@ -17,8 +24,18 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean DEBUG = Config.DEBUG;
+
+    private static Timer timer;
+    private Drawable mOffBackground;
+    private Drawable mOnBackground;
+    private ToggleButton outputButton;
+    private ImageButton inputButton;
+
     private MalosDevice gpio;
     private MalosDevice humidity;
+    private MalosDevice uv;
+    private Drawable mOffImage;
+    private Drawable mOnImage;
 
 
     @Override
@@ -28,21 +45,29 @@ public class MainActivity extends AppCompatActivity {
 
         gpio = new MalosDevice(MalosTarget.GPIO);
         humidity = new MalosDevice(MalosTarget.HUMIDITY);
+        uv = new MalosDevice(MalosTarget.UV);
 
-        ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton);
-        toggle.setOnCheckedChangeListener(onCheckedGpioToggleButton);
+        outputButton = (ToggleButton) findViewById(R.id.tb_main_ouput);
+        inputButton = (ImageButton) findViewById(R.id.ib_main_input);
+        outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
 
-//      mOffBackground = getDrawable(R.drawable.toggle_button_off_holo_dark);
-//		mOnBackground = getDrawable(R.drawable.toggle_button_on_holo_dark);
+        mOffBackground = getResources().getDrawable(R.drawable.toggle_button_off_holo_dark);
+		mOnBackground = getResources().getDrawable(R.drawable.toggle_button_on_holo_dark);
+        int onImageId = R.drawable.indicator_button1_on_noglow;
+        int offImageId = R.drawable.indicator_button1_off_noglow;
+        mOffImage = getResources().getDrawable(offImageId);
+        mOnImage = getResources().getDrawable(onImageId);
     }
 
     private OnCheckedChangeListener onCheckedGpioToggleButton = new OnCheckedChangeListener() {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             if (isChecked) {
-                if(DEBUG)Log.i(TAG,"toggle on");
+                if(DEBUG)Log.i(TAG,"outputButton on");
+                outputButton.setBackgroundDrawable(mOnBackground);
                 configGpioOuputValue(0,1);
             } else {
-                if(DEBUG)Log.i(TAG,"toggle off");
+                if(DEBUG)Log.i(TAG,"outputButton off");
+                outputButton.setBackgroundDrawable(mOffBackground);
                 configGpioOuputValue(0,0);
             }
         }
@@ -51,23 +76,43 @@ public class MainActivity extends AppCompatActivity {
 
     private OnSubscriptionCallBack onGpioInputCallBack = new OnSubscriptionCallBack() {
         @Override
-        public void onReceiveData(byte[] data) {
-            try {
-                GpioParams gpioParams = GpioParams.parseFrom(data);
-                if(DEBUG)Log.d(TAG,"onGpioInputCallBack receive value: "+gpioParams.getValue());
-            } catch (InvalidProtocolBufferException e) {
-                e.printStackTrace();
-            }
+        public void onReceiveData(final byte[] data) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        GpioParams gpioParams = GpioParams.parseFrom(data);
+                        if(DEBUG)Log.d(TAG,"onGpioInputCallBack receive value: "+gpioParams.getValue());
+                        if(gpioParams.getValue()==0)inputButton.setImageDrawable(mOffImage);
+                        else inputButton.setImageDrawable(mOnImage);
+                    } catch (InvalidProtocolBufferException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
         }
     };
 
     private OnSubscriptionCallBack onHumidityDataCallBack = new OnSubscriptionCallBack() {
         @Override
         public void onReceiveData(byte[] data) {
-
             try {
                 Humidity humidity = Humidity.parseFrom(data);
                 if(DEBUG)Log.d(TAG,"onHumidityDataCallBack value: "+humidity.getHumidity());
+            } catch (InvalidProtocolBufferException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private OnSubscriptionCallBack onUVDataCallBack = new OnSubscriptionCallBack() {
+        @Override
+        public void onReceiveData(byte[] data) {
+            try {
+                UV uv = UV.parseFrom(data);
+                if(DEBUG)Log.d(TAG,"onUVData OmsRisk: "+uv.getOmsRisk());
+                if(DEBUG)Log.d(TAG,"onUVData UvIndex: "+uv.getUvIndex());
             } catch (InvalidProtocolBufferException e) {
                 e.printStackTrace();
             }
@@ -93,17 +138,37 @@ public class MainActivity extends AppCompatActivity {
         humidity.push("");
     }
 
+    public void requestUVData(){
+        uv.push("");
+    }
+
     @Override
     protected void onResume() {
         gpio.connect();
         gpio.subscription(onGpioInputCallBack);
         humidity.subscription(onHumidityDataCallBack);
+        uv.subscription(onUVDataCallBack);
+        timer = new Timer();
+        startTimer();
         super.onResume();
     }
 
     @Override
     protected void onStop() {
         gpio.disconnect();
+        timer.cancel();
         super.onStop();
     }
+
+    public void startTimer() {
+        timer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                requestGpioInputValue(1);
+                requestHumidityData();
+                requestUVData();
+            }
+        }, 0, 1000);
+    }
+
+
 }

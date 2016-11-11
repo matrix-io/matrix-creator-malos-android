@@ -25,7 +25,7 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/Button1"
+            android:id="@+id/ib_main_input"
             style="@style/DemoKitButtonDisplay"
             android:background="@null"
             android:src="@drawable/indicator_button1_off_noglow"></ImageButton>

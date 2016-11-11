@@ -8,6 +8,7 @@ public class MalosTarget {
 
     public static final int GPIO = 20049;
     public static final int HUMIDITY = 20017;
+    public static final int UV = 20013 + (4 * 4);
 
     private int baseport;
 

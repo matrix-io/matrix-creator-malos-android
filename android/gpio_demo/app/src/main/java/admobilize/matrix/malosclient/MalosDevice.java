@@ -41,6 +41,7 @@ public class MalosDevice {
 
     public void subscription (OnSubscriptionCallBack cb){
          new Thread(new ZeroMQSubscription(cb)).start();
+//        new ZeroMQSub(cb).execute();
     }
 
     public void push (String data){
@@ -51,6 +52,7 @@ public class MalosDevice {
         new ZeroMQDisonnect().execute();
     }
 
+    // TODO: unify Connect and Config ??
     private class ZeroMQConnect extends AsyncTask<String, Void, Void> {
 
         @Override
@@ -73,8 +75,34 @@ public class MalosDevice {
         @Override
         protected Void doInBackground(Void... voids) {
             config_socket.send(config.build().toByteArray());
-            Log.d(TAG,"ZeroMQMessageTask doInBackground..");
             return null;
+        }
+    }
+
+    private class ZeroMQSub extends AsyncTask<Void,Void,Void>{
+
+        private final OnSubscriptionCallBack cb;
+
+        public ZeroMQSub(OnSubscriptionCallBack cb) {
+            this.cb=cb;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            ZMQ.Context sub_context = ZMQ.context(1);
+            sub_socket = sub_context.socket(ZMQ.SUB);
+            sub_socket.connect(driver.getSubPort());
+            sub_socket.subscribe("".getBytes());
+
+            while(true) {
+                try {
+                    cb.onReceiveData(sub_socket.recv());
+                    return null;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
         }
     }
 
@@ -90,7 +118,6 @@ public class MalosDevice {
         public void run() {
             ZMQ.Context sub_context = ZMQ.context(1);
             sub_socket = sub_context.socket(ZMQ.SUB);
-            if(DEBUG)Log.i(TAG,"ZeroMQSubscription connecting to: "+driver.getSubPort());
             sub_socket.connect(driver.getSubPort());
             sub_socket.subscribe("".getBytes());
 
@@ -126,7 +153,6 @@ public class MalosDevice {
             ZMQ.Context push_context = ZMQ.context(1);
             ZMQ.Socket push_socket = push_context.socket(ZMQ.PUSH);
             push_socket.connect(driver.getPushPort());
-            if(DEBUG)Log.d(TAG,"ZeroMQPush to: "+driver.getPushPort());
             push_socket.send(data[0]);
             push_socket.close();
             push_context.term();
