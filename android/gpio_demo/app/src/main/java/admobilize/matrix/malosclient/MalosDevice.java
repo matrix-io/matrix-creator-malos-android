@@ -20,6 +20,8 @@ public class MalosDevice {
     private ZMQ.Context config_context;
     private ZMQ.Socket config_socket;
     private ZMQ.Socket sub_socket;
+    private ZMQ.Context push_context;
+    private ZMQ.Socket push_socket;
 
     public interface OnSubscriptionCallBack {
         void onReceiveData(byte[] data);
@@ -29,7 +31,7 @@ public class MalosDevice {
         this.driver=new MalosTarget(malosTarget);
     }
 
-    public void connect (){
+    public void bindConfig(){
         new ZeroMQConnect().execute(driver.getBaseport());
     }
 
@@ -37,20 +39,22 @@ public class MalosDevice {
         new ZeroMQConfig(config).execute();
     }
 
-    public void subs (OnSubscriptionCallBack cb){
+    public void subscribe(OnSubscriptionCallBack cb){
          new Thread(new ZeroMQSubscription(cb)).start();
-//        new ZeroMQSub(cb).execute();
+    }
+
+    public void unsubscribe (){
+        new ZeroMQUnsubscribe().execute();
     }
 
     public void push (String data){
         new ZeroMQPush().execute(data);
     }
 
-    public void disconnect() {
-        new ZeroMQDisconnect().execute();
+    public void unbindConfig() {
+        new ZeroMQUnbindConfig().execute();
     }
 
-    // TODO: unify Connect and Config ??
     private class ZeroMQConnect extends AsyncTask<String, Void, Void> {
 
         @Override
@@ -73,7 +77,7 @@ public class MalosDevice {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                config_socket.send(config.build().toByteArray());
+                if(config_socket!=null)config_socket.send(config.build().toByteArray());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -108,29 +112,36 @@ public class MalosDevice {
         }
     }
 
-    private class ZeroMQDisconnect extends AsyncTask<Void, Void, Void> {
-
+    private class ZeroMQUnbindConfig extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void...voids) {
             if(DEBUG)Log.d(TAG,"disconnecting..");
             config_socket.close();
             config_context.term();
-            if(sub_socket!=null)sub_socket.close();
+            config_socket=null;
+            config_context=null;
             return null;
         }
     }
 
+    private class ZeroMQUnsubscribe extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void...voids) {
+            if(DEBUG)Log.d(TAG,"disconnecting..");
+            sub_socket.close();
+            return null;
+        }
+    }
 
     private class ZeroMQPush extends AsyncTask<String, Void, Void> {
-
         @Override
         protected Void doInBackground(String...data) {
-            ZMQ.Context push_context = ZMQ.context(1);
-            ZMQ.Socket push_socket = push_context.socket(ZMQ.PUSH);
-            push_socket.connect(driver.getPushPort());
+            if(push_context==null||push_socket==null) {
+                push_context = ZMQ.context(1);
+                push_socket = push_context.socket(ZMQ.PUSH);
+                push_socket.connect(driver.getPushPort());
+            }
             push_socket.send(data[0]);
-            push_socket.close();
-            push_context.term();
             return null;
         }
     }

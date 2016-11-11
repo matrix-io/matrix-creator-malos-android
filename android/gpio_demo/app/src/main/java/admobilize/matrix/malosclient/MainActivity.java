@@ -170,10 +170,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        gpio.connect();
-        gpio.subs(onGpioInputCallBack);
-        humidity.subs(onHumidityDataCallBack);
-        uv.subs(onUVDataCallBack);
+        gpio.bindConfig();
+        gpio.subscribe(onGpioInputCallBack);
+        humidity.subscribe(onHumidityDataCallBack);
+        uv.subscribe(onUVDataCallBack);
         timer = new Timer();
         startTimer();
         super.onResume();
@@ -181,8 +181,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        gpio.disconnect();
         timer.cancel();
+        gpio.unbindConfig();
+        gpio.unsubscribe();
+        humidity.unsubscribe();
+        uv.unsubscribe();
         super.onStop();
     }
 
