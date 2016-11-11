@@ -1,127 +1,109 @@
 package admobilize.matrix.malosclient;
 
-import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.ToggleButton;
 
-import org.zeromq.ZMQ;
-
+import com.google.protobuf.InvalidProtocolBufferException;
 import matrix_malos.Driver.GpioParams.Builder;
 
+import static admobilize.matrix.malosclient.MalosDevice.*;
+import static android.widget.CompoundButton.*;
 import static matrix_malos.Driver.*;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final boolean DEBUG = Config.DEBUG;
+    private MalosDevice gpio;
+    private MalosDevice humidity;
 
-    private ZMQ.Context config_context;
-    private ZMQ.Socket config_socket;
-    private ZMQ.Socket sub_socket;
-    private Drawable mOffBackground;
-    private Drawable mOnBackground;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton);
-        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    Log.i(TAG,"toggle on");
-                    sendOuputValue(0,1);
-                } else {
-                    Log.i(TAG,"toggle off");
-                    sendOuputValue(0,0);
-                }
-            }
-        });
+        gpio = new MalosDevice(MalosTarget.GPIO);
+        humidity = new MalosDevice(MalosTarget.HUMIDITY);
 
-//        mOffBackground = getDrawable(R.drawable.toggle_button_off_holo_dark);
+        ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton);
+        toggle.setOnCheckedChangeListener(onCheckedGpioToggleButton);
+
+//      mOffBackground = getDrawable(R.drawable.toggle_button_off_holo_dark);
 //		mOnBackground = getDrawable(R.drawable.toggle_button_on_holo_dark);
     }
 
-    public void sendOuputValue(int pin,int value){
+    private OnCheckedChangeListener onCheckedGpioToggleButton = new OnCheckedChangeListener() {
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            if (isChecked) {
+                if(DEBUG)Log.i(TAG,"toggle on");
+                configGpioOuputValue(0,1);
+            } else {
+                if(DEBUG)Log.i(TAG,"toggle off");
+                configGpioOuputValue(0,0);
+            }
+        }
+    };
+
+
+    private OnSubscriptionCallBack onGpioInputCallBack = new OnSubscriptionCallBack() {
+        @Override
+        public void onReceiveData(byte[] data) {
+            try {
+                GpioParams gpioParams = GpioParams.parseFrom(data);
+                if(DEBUG)Log.d(TAG,"onGpioInputCallBack receive value: "+gpioParams.getValue());
+            } catch (InvalidProtocolBufferException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private OnSubscriptionCallBack onHumidityDataCallBack = new OnSubscriptionCallBack() {
+        @Override
+        public void onReceiveData(byte[] data) {
+
+            try {
+                Humidity humidity = Humidity.parseFrom(data);
+                if(DEBUG)Log.d(TAG,"onHumidityDataCallBack value: "+humidity.getHumidity());
+            } catch (InvalidProtocolBufferException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    public void configGpioOuputValue(int pin, int value){
         Builder gpioParams = GpioParams.newBuilder();
         gpioParams.setPin(pin);
         gpioParams.setModeValue(GpioParams.EnumMode.OUTPUT_VALUE);
         gpioParams.setValue(value);
-        new ZeroMQSend(DriverConfig.newBuilder().setGpio(gpioParams)).execute();
+        gpio.config(DriverConfig.newBuilder().setGpio(gpioParams));
     }
 
-    public class ZeroMQConnect extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void...voids) {
-            config_context = ZMQ.context(1);
-            config_socket = config_context.socket(ZMQ.PUSH);
-            config_socket.connect(Config.MALOS_GPIO_CONFIG);
-            return null;
-        }
+    public void requestGpioInputValue(int pin){
+        Builder gpioParams = GpioParams.newBuilder();
+        gpioParams.setPin(pin);
+        gpioParams.setModeValue(GpioParams.EnumMode.INPUT_VALUE);
+        gpio.config(DriverConfig.newBuilder().setGpio(gpioParams));
     }
 
-    public class ZeroMQServer implements Runnable {
-//        private final Handler uiThreadHandler;
-//
-//        public ZeroMQServer(Handler uiThreadHandler) {
-//            this.uiThreadHandler = uiThreadHandler;
-//        }
-
-        @Override
-        public void run() {
-
-            ZMQ.Context context = ZMQ.context(1);
-            sub_socket = context.socket(ZMQ.SUB);
-            sub_socket.connect(Config.MALOS_GPIO_SUB);
-            sub_socket.subscribe("".getBytes());
-
-            while(!Thread.currentThread().isInterrupted()) {
-
-                // Read envelope with address
-                String address = sub_socket.recvStr ();
-                // Read message contents
-                String contents = sub_socket.recvStr ();
-                byte[] msg = sub_socket.recv(0);
-                Log.i(TAG,"ZeroMQSubscription: "+address + " : " + contents +" "+msg);
-            }
-            sub_socket.close();
-            context.close();
-        }
-    }
-
-
-    public class ZeroMQSend extends AsyncTask<Void, Void, Void>{
-        private DriverConfig.Builder config;
-
-        public ZeroMQSend(DriverConfig.Builder config) {
-            this.config=config;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            config_socket.send(config.build().toByteArray());
-            Log.d(TAG,"ZeroMQMessageTask doInBackground result");
-            return null;
-        }
+    public void requestHumidityData(){
+        humidity.push("");
     }
 
     @Override
     protected void onResume() {
-        new ZeroMQConnect().execute();
-         new Thread(new ZeroMQServer()).start();
+        gpio.connect();
+        gpio.subscription(onGpioInputCallBack);
+        humidity.subscription(onHumidityDataCallBack);
         super.onResume();
     }
 
     @Override
     protected void onStop() {
-        config_socket.close();
-        sub_socket.close();
-        config_context.term();
+        gpio.disconnect();
         super.onStop();
     }
 }
