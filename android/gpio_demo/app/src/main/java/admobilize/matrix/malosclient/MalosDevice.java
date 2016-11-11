@@ -2,7 +2,6 @@ package admobilize.matrix.malosclient;
 
 import android.os.AsyncTask;
 import android.util.Log;
-
 import org.zeromq.ZMQ;
 
 import static matrix_malos.Driver.*;
@@ -15,6 +14,7 @@ public class MalosDevice {
 
     private static final String TAG = MalosDevice.class.getSimpleName();
     private static final boolean DEBUG = Config.DEBUG;
+    private static final boolean VERBOSE = Config.DEBUG&&true;
 
     private final MalosTarget driver;
     private ZMQ.Context config_context;
@@ -31,8 +31,8 @@ public class MalosDevice {
         this.driver=new MalosTarget(malosTarget);
     }
 
-    public void bindConfig(){
-        new ZeroMQConnect().execute(driver.getBaseport());
+    public void start(){
+        new ZeroMQConnect().execute();
     }
 
     public void config (DriverConfig.Builder config){
@@ -51,20 +51,33 @@ public class MalosDevice {
         new ZeroMQPush().execute(data);
     }
 
-    public void unbindConfig() {
-        new ZeroMQUnbindConfig().execute();
+    public void stop() {
+        new ZeroMQstop().execute();
     }
 
-    private class ZeroMQConnect extends AsyncTask<String, Void, Void> {
+    private class ZeroMQConnect extends AsyncTask<Void, Void, Void> {
 
         @Override
-        protected Void doInBackground(String...port) {
+        protected Void doInBackground(Void...voids) {
             config_context = ZMQ.context(1);
             config_socket = config_context.socket(ZMQ.PUSH);
-            config_socket.connect(port[0]);
-            if(DEBUG)Log.d(TAG,"connecting with: "+port[0]);
+            config_socket.connect(driver.getBaseport());
+            if(DEBUG)Log.i(TAG,"connected with: "+driver.getBaseport());
             return null;
         }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+//            new ZeroMQConfig(getBasicConfig()).execute();
+            super.onPostExecute(aVoid);
+        }
+    }
+
+    public DriverConfig.Builder getBasicConfig() {
+        DriverConfig.Builder driverConfig = DriverConfig.newBuilder();
+        driverConfig.setDelayBetweenUpdates(2.0f);
+        driverConfig.setTimeoutAfterLastPing(6.0f);
+        return driverConfig;
     }
 
     private class ZeroMQConfig extends AsyncTask<Void, Void, Void>{
@@ -77,7 +90,10 @@ public class MalosDevice {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                if(config_socket!=null)config_socket.send(config.build().toByteArray());
+                if(config_socket!=null){
+                    if(VERBOSE)Log.i(TAG,"sending configuration: "+config.toString());
+                    config_socket.send(config.build().toByteArray());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -102,7 +118,7 @@ public class MalosDevice {
 
             while(!Thread.currentThread().isInterrupted()) {
                 try {
-                    cb.onReceiveData(sub_socket.recv());
+                    if(sub_socket!=null)cb.onReceiveData(sub_socket.recv());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -112,10 +128,10 @@ public class MalosDevice {
         }
     }
 
-    private class ZeroMQUnbindConfig extends AsyncTask<Void, Void, Void> {
+    private class ZeroMQstop extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void...voids) {
-            if(DEBUG)Log.d(TAG,"disconnecting..");
+            if(DEBUG)Log.d(TAG,"stoping..");
             config_socket.close();
             config_context.term();
             config_socket=null;
@@ -127,8 +143,9 @@ public class MalosDevice {
     private class ZeroMQUnsubscribe extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void...voids) {
-            if(DEBUG)Log.d(TAG,"disconnecting..");
+            if(DEBUG)Log.d(TAG,"unsubscribe..");
             sub_socket.close();
+            sub_socket=null;
             return null;
         }
     }
@@ -137,10 +154,12 @@ public class MalosDevice {
         @Override
         protected Void doInBackground(String...data) {
             if(push_context==null||push_socket==null) {
+                if(VERBOSE)Log.i(TAG,"creating push connection..");
                 push_context = ZMQ.context(1);
                 push_socket = push_context.socket(ZMQ.PUSH);
                 push_socket.connect(driver.getPushPort());
             }
+            if(VERBOSE)Log.i(TAG,"push data..");
             push_socket.send(data[0]);
             return null;
         }

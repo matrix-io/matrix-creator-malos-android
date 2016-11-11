@@ -25,7 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean DEBUG = Config.DEBUG;
 
-    private static Timer timer;
+    private static Timer timerSensors;
+    private static Timer timerGpio;
     private Drawable mOffBackground;
     private Drawable mOnBackground;
     private ToggleButton outputButton;
@@ -40,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView uv_risk;
     private TextView temp_value;
     private TextView humi_value;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
         uv_risk = (TextView)findViewById(R.id.tv_sensor_uv_detail);
         temp_value = (TextView)findViewById(R.id.tv_sensor_temp_value);
         humi_value = (TextView)findViewById(R.id.tv_sensor_humidity_value);
-
 
         mOffBackground = getResources().getDrawable(R.drawable.toggle_button_off_holo_dark);
 		mOnBackground = getResources().getDrawable(R.drawable.toggle_button_on_holo_dark);
@@ -168,35 +167,59 @@ public class MainActivity extends AppCompatActivity {
         uv.push("");
     }
 
+    public void startHumiditySensor(){
+        humidity.start();
+        DriverConfig.Builder config = humidity.getBasicConfig();
+        HumidityParams.Builder params = HumidityParams.newBuilder();
+        params.setCurrentTemperature(23.0f);
+        params.setDoCalibration(true);
+        config.setHumidity(params);
+        humidity.config(config);
+        humidity.subscribe(onHumidityDataCallBack);
+    }
+
     @Override
     protected void onResume() {
-        gpio.bindConfig();
-        gpio.subscribe(onGpioInputCallBack);
-        humidity.subscribe(onHumidityDataCallBack);
+        startHumiditySensor();
+        uv.start();
+        gpio.start();
         uv.subscribe(onUVDataCallBack);
-        timer = new Timer();
-        startTimer();
+        gpio.subscribe(onGpioInputCallBack);
+        timerSensors = new Timer();
+        timerGpio = new Timer();
+        startTimerSensors();
+        startTimerGpio();
         super.onResume();
     }
 
     @Override
     protected void onStop() {
-        timer.cancel();
-        gpio.unbindConfig();
+        timerSensors.cancel();
+        timerGpio.cancel();
+        humidity.stop();
+        uv.stop();
+        gpio.stop();
         gpio.unsubscribe();
         humidity.unsubscribe();
         uv.unsubscribe();
         super.onStop();
     }
 
-    public void startTimer() {
-        timer.scheduleAtFixedRate(new TimerTask() {
+    public void startTimerSensors() {
+        timerSensors.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-                requestGpioInputValue(1);
                 requestHumidityData();
                 requestUVData();
             }
-        }, 0, 1000);
+        }, 0, 7000);
+    }
+
+    public void startTimerGpio() {
+        timerGpio.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                requestGpioInputValue(1);
+            }
+        }, 0, 500);
     }
 
 
