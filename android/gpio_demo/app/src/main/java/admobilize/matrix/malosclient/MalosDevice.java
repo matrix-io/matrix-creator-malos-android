@@ -91,7 +91,7 @@ public class MalosDevice {
         protected Void doInBackground(Void... voids) {
             try {
                 if(config_socket!=null){
-                    if(VERBOSE)Log.i(TAG,"sending configuration: "+config.toString());
+                    if(VERBOSE)Log.i(TAG,"sending configuration..");
                     config_socket.send(config.build().toByteArray());
                 }
             } catch (Exception e) {
