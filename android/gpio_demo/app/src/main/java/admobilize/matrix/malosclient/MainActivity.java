@@ -170,9 +170,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void configEverLoop(int value, int color){
         if(DEBUG)Log.d(TAG,"configEverLoop: "+value+ ","+color);
-        if(color==0)red=value/5;
-        if(color==1)green=value/5;
-        if(color==2)blue=value/5;
+        if(color==0)red=value/Config.LED_INTENSITY_DIVISOR;
+        if(color==1)green=value/Config.LED_INTENSITY_DIVISOR;
+        if(color==2)blue=value/Config.LED_INTENSITY_DIVISOR;
         EverloopImage.Builder image = EverloopImage.newBuilder();
         for(int i=0;i<35;i++){
             LedValue.Builder ledValue = LedValue.newBuilder();
