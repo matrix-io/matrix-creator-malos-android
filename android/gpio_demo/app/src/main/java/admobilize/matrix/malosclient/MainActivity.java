@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -14,6 +15,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import matrix_malos.Driver;
 import matrix_malos.Driver.GpioParams.Builder;
 
 import static admobilize.matrix.malosclient.MalosDevice.*;
@@ -35,12 +37,14 @@ public class MainActivity extends AppCompatActivity {
     private MalosDevice gpio;
     private MalosDevice humidity;
     private MalosDevice uv;
+    private MalosDevice everloop;
     private Drawable mOffImage;
     private Drawable mOnImage;
     private TextView uv_value;
     private TextView uv_risk;
     private TextView temp_value;
     private TextView humi_value;
+    private int red, green, blue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         gpio = new MalosDevice(MalosTarget.GPIO);
         humidity = new MalosDevice(MalosTarget.HUMIDITY);
         uv = new MalosDevice(MalosTarget.UV);
+        everloop = new MalosDevice(MalosTarget.EVERLOOP);
 
         outputButton = (ToggleButton) findViewById(R.id.tb_main_ouput);
         inputButton = (ImageButton) findViewById(R.id.ib_main_input);
@@ -66,6 +71,9 @@ public class MainActivity extends AppCompatActivity {
         int offImageId = R.drawable.indicator_button1_off_noglow;
         mOffImage = getResources().getDrawable(offImageId);
         mOnImage = getResources().getDrawable(onImageId);
+
+        ColorLEDController ledController = new ColorLEDController(this, 1, getResources(),true);
+        ledController.attachToView((ViewGroup) findViewById(R.id.leds1));
     }
 
     private OnCheckedChangeListener onCheckedGpioToggleButton = new OnCheckedChangeListener() {
@@ -144,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+
     public void configGpioOuputValue(int pin, int value){
         Builder gpioParams = GpioParams.newBuilder();
         gpioParams.setPin(pin);
@@ -157,6 +166,22 @@ public class MainActivity extends AppCompatActivity {
         gpioParams.setPin(pin);
         gpioParams.setModeValue(GpioParams.EnumMode.INPUT_VALUE);
         gpio.config(DriverConfig.newBuilder().setGpio(gpioParams));
+    }
+
+    public void configEverLoop(int value, int color){
+        if(DEBUG)Log.d(TAG,"configEverLoop: "+value+ ","+color);
+        if(color==0)red=value/5;
+        if(color==1)green=value/5;
+        if(color==2)blue=value/5;
+        EverloopImage.Builder image = EverloopImage.newBuilder();
+        for(int i=0;i<35;i++){
+            LedValue.Builder ledValue = LedValue.newBuilder();
+            ledValue.setRed(red);
+            ledValue.setGreen(green);
+            ledValue.setBlue(blue);
+            image.addLed(ledValue);
+        }
+        everloop.config(DriverConfig.newBuilder().setImage(image));
     }
 
     public void requestHumidityData(){
@@ -181,14 +206,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         startHumiditySensor();
+
         uv.start();
         gpio.start();
+        everloop.start();
+
         uv.subscribe(onUVDataCallBack);
         gpio.subscribe(onGpioInputCallBack);
+
         timerSensors = new Timer();
         timerGpio = new Timer();
         startTimerSensors();
         startTimerGpio();
+
         super.onResume();
     }
 
@@ -198,6 +228,7 @@ public class MainActivity extends AppCompatActivity {
         timerGpio.cancel();
         humidity.stop();
         uv.stop();
+        everloop.stop();
         gpio.stop();
         gpio.unsubscribe();
         humidity.unsubscribe();
