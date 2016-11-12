@@ -22,7 +22,7 @@
 
         <TextView
             android:id="@+id/tv_sensor_temp_value"
-            style="@style/DemoKitMeasurement"
+            style="@style/DemoKitMeasurementTiny"
             android:layout_weight="1"
             android:text="45º"></TextView>
 
@@ -51,7 +51,7 @@
 
             <TextView
                 android:id="@+id/tv_sensor_humidity_value"
-                style="@style/DemoKitMeasurement"
+                style="@style/DemoKitMeasurementTiny"
                 android:text="12"></TextView>
 
             <TextView
@@ -95,7 +95,7 @@
             style="@style/DemoKitControlLabel"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="UV"></TextView>
+            android:text="UV index"></TextView>
 
         <LinearLayout
             android:id="@+id/ll_sensor_uv_percent"
@@ -105,14 +105,14 @@
 
             <TextView
                 android:id="@+id/tv_sensor_uv_percent_value"
-                style="@style/DemoKitMeasurement"
+                style="@style/DemoKitMeasurementTiny"
                 android:text="23"></TextView>
 
-            <TextView
-                android:id="@+id/tv_sensor_uv_percent_suffix"
-                style="@style/DemoKitMeasurementSuffix"
-                android:gravity="top"
-                android:text="%"></TextView>
+            <!--<TextView-->
+                <!--android:id="@+id/tv_sensor_uv_percent_suffix"-->
+                <!--style="@style/DemoKitMeasurementSuffix"-->
+                <!--android:gravity="top"-->
+                <!--android:text="%"></TextView>-->
         </LinearLayout>
 
         <LinearLayout

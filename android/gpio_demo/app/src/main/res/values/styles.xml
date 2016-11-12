@@ -38,6 +38,12 @@
 		<item name="android:layout_marginBottom">0dip</item>
 		<item name="android:layout_gravity">top</item>
 	</style>
+	<style name="DemoKitMeasurementTiny" parent="@style/DemoKitTextBase">
+		<item name="android:textSize">32dip</item>
+		<item name="android:layout_marginTop">-4dip</item>
+		<item name="android:layout_marginBottom">0dip</item>
+		<item name="android:layout_gravity">top</item>
+	</style>
 	<style name="DemoKitLEDText" parent="@style/DemoKitControlLabel">
 		<item name="android:layout_width">wrap_content</item>
 		<item name="android:layout_height">wrap_content</item>
