@@ -22,6 +22,7 @@ public class MainActivity extends BaseActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean DEBUG = Config.DEBUG;
+    private static final boolean VERBOSE = Config.VERBOSE;
 
     private MalosDevice gpio;
     private MalosDevice humidity;
@@ -71,7 +72,7 @@ public class MainActivity extends BaseActivity {
                 public void run() {
                     try {
                         GpioParams gpioParams = GpioParams.parseFrom(data);
-                        if(DEBUG)Log.d(TAG,"onGpioInputCallBack receive value: "+gpioParams.getValue());
+                        if(VERBOSE)Log.d(TAG,"onGpioInputCallBack receive value: "+gpioParams.getValue());
                         if(gpioParams.getValue()==0)inputButton.setImageDrawable(mOffImage);
                         else inputButton.setImageDrawable(mOnImage);
                     } catch (InvalidProtocolBufferException e) {
@@ -91,8 +92,8 @@ public class MainActivity extends BaseActivity {
                 public void run() {
                     try {
                         Humidity humidity = Humidity.parseFrom(data);
-                        if(DEBUG)Log.d(TAG,"onHumidityDataCallBack humidity: "+humidity.getHumidity());
-                        if(DEBUG)Log.d(TAG,"onHumidityDataCallBack temperature: "+humidity.getTemperature());
+                        if(VERBOSE)Log.d(TAG,"onHumidityDataCallBack humidity: "+humidity.getHumidity());
+                        if(VERBOSE)Log.d(TAG,"onHumidityDataCallBack temperature: "+humidity.getTemperature());
                         temp_value.setText(""+((int)(humidity.getTemperature()*10))/10.0f+"º");
                         humi_value.setText(""+((int)(humidity.getHumidity()*10))/10.0f);
                     } catch (InvalidProtocolBufferException e) {
@@ -112,8 +113,8 @@ public class MainActivity extends BaseActivity {
                 public void run() {
                     try {
                         UV uv = UV.parseFrom(data);
-                        if(DEBUG)Log.d(TAG,"onUVData OmsRisk: "+uv.getOmsRisk());
-                        if(DEBUG)Log.d(TAG,"onUVData UvIndex: "+uv.getUvIndex());
+                        if(VERBOSE)Log.d(TAG,"onUVData OmsRisk: "+uv.getOmsRisk());
+                        if(VERBOSE)Log.d(TAG,"onUVData UvIndex: "+uv.getUvIndex());
                         String uv_index = new DecimalFormat("##.##").format(uv.getUvIndex());
                         uv_value.setText(uv_index);
                         uv_risk.setText(uv.getOmsRisk());
@@ -141,7 +142,7 @@ public class MainActivity extends BaseActivity {
     }
 
     public void configEverLoop(int value, int color){
-        if(DEBUG)Log.d(TAG,"configEverLoop: "+value+ ","+color);
+        if(VERBOSE)Log.d(TAG,"configEverLoop: "+value+ ","+color);
         if(color==0)red=value/Config.LED_INTENSITY_DIVISOR;
         if(color==1)green=value/Config.LED_INTENSITY_DIVISOR;
         if(color==2)blue=value/Config.LED_INTENSITY_DIVISOR;

@@ -14,7 +14,7 @@ public class MalosDevice {
 
     private static final String TAG = MalosDevice.class.getSimpleName();
     private static final boolean DEBUG = Config.DEBUG;
-    private static final boolean VERBOSE = Config.DEBUG&&false;
+    private static final boolean VERBOSE = Config.VERBOSE;
 
     private final MalosTarget driver;
     private ZMQ.Context config_context;
@@ -62,7 +62,7 @@ public class MalosDevice {
             config_context = ZMQ.context(1);
             config_socket = config_context.socket(ZMQ.PUSH);
             config_socket.connect(driver.getBaseport());
-            if(DEBUG)Log.i(TAG,"connected with: "+driver.getBaseport());
+            if(DEBUG)Log.d(TAG,"connected with: "+driver.getBaseport());
             return null;
         }
 
@@ -115,6 +115,7 @@ public class MalosDevice {
             sub_socket = sub_context.socket(ZMQ.SUB);
             sub_socket.connect(driver.getSubPort());
             sub_socket.subscribe("".getBytes());
+            if(DEBUG)Log.i(TAG,"subscribe with: "+driver.getSubPort());
 
             while(!Thread.currentThread().isInterrupted()) {
                 try {
@@ -132,7 +133,7 @@ public class MalosDevice {
     private class ZeroMQstop extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void...voids) {
-            if(DEBUG)Log.d(TAG,"stoping..");
+            if(DEBUG)Log.d(TAG,"stopping "+driver.getBaseport());
             config_socket.close();
             config_context.term();
             config_socket=null;
@@ -144,8 +145,8 @@ public class MalosDevice {
     private class ZeroMQUnsubscribe extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void...voids) {
-            if(DEBUG)Log.d(TAG,"unsubscribe..");
-            sub_socket.close();
+            if(DEBUG)Log.d(TAG,"unsubscribe "+driver.getSubPort());
+            if(sub_socket!=null)sub_socket.close();
             sub_socket=null;
             return null;
         }
