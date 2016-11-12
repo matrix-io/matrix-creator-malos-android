@@ -1,49 +1,33 @@
 package admobilize.matrix.malosclient;
 
-import android.graphics.drawable.Drawable;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
-import android.widget.TextView;
-import android.widget.ToggleButton;
-
+import static android.widget.CompoundButton.OnCheckedChangeListener;
 import com.google.protobuf.InvalidProtocolBufferException;
-
-import java.util.Timer;
-import java.util.TimerTask;
-
-import matrix_malos.Driver;
+import java.text.DecimalFormat;
 import matrix_malos.Driver.GpioParams.Builder;
 
-import static admobilize.matrix.malosclient.MalosDevice.*;
-import static android.widget.CompoundButton.*;
-import static matrix_malos.Driver.*;
+import static admobilize.matrix.malosclient.MalosDevice.OnSubscriptionCallBack;
+import static matrix_malos.Driver.DriverConfig;
+import static matrix_malos.Driver.EverloopImage;
+import static matrix_malos.Driver.GpioParams;
+import static matrix_malos.Driver.Humidity;
+import static matrix_malos.Driver.HumidityParams;
+import static matrix_malos.Driver.LedValue;
+import static matrix_malos.Driver.UV;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean DEBUG = Config.DEBUG;
-
-    private static Timer timerSensors;
-    private static Timer timerGpio;
-    private Drawable mOffBackground;
-    private Drawable mOnBackground;
-    private ToggleButton outputButton;
-    private ImageButton inputButton;
 
     private MalosDevice gpio;
     private MalosDevice humidity;
     private MalosDevice uv;
     private MalosDevice everloop;
-    private Drawable mOffImage;
-    private Drawable mOnImage;
-    private TextView uv_value;
-    private TextView uv_risk;
-    private TextView temp_value;
-    private TextView humi_value;
+
     private int red, green, blue;
 
     @Override
@@ -56,24 +40,12 @@ public class MainActivity extends AppCompatActivity {
         uv = new MalosDevice(MalosTarget.UV);
         everloop = new MalosDevice(MalosTarget.EVERLOOP);
 
-        outputButton = (ToggleButton) findViewById(R.id.tb_main_ouput);
-        inputButton = (ImageButton) findViewById(R.id.ib_main_input);
-        outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
-
-        uv_value = (TextView)findViewById(R.id.tv_sensor_uv_percent_value);
-        uv_risk = (TextView)findViewById(R.id.tv_sensor_uv_detail);
-        temp_value = (TextView)findViewById(R.id.tv_sensor_temp_value);
-        humi_value = (TextView)findViewById(R.id.tv_sensor_humidity_value);
-
-        mOffBackground = getResources().getDrawable(R.drawable.toggle_button_off_holo_dark);
-		mOnBackground = getResources().getDrawable(R.drawable.toggle_button_on_holo_dark);
-        int onImageId = R.drawable.indicator_button1_on_noglow;
-        int offImageId = R.drawable.indicator_button1_off_noglow;
-        mOffImage = getResources().getDrawable(offImageId);
-        mOnImage = getResources().getDrawable(onImageId);
+        instanceUI();
 
         ColorLEDController ledController = new ColorLEDController(this, 1, getResources(),true);
         ledController.attachToView((ViewGroup) findViewById(R.id.leds1));
+        outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
+
     }
 
     private OnCheckedChangeListener onCheckedGpioToggleButton = new OnCheckedChangeListener() {
@@ -142,7 +114,8 @@ public class MainActivity extends AppCompatActivity {
                         UV uv = UV.parseFrom(data);
                         if(DEBUG)Log.d(TAG,"onUVData OmsRisk: "+uv.getOmsRisk());
                         if(DEBUG)Log.d(TAG,"onUVData UvIndex: "+uv.getUvIndex());
-                        uv_value.setText(""+Integer.parseInt(""+(int)(uv.getUvIndex()*1000)));
+                        String uv_index = new DecimalFormat("##.##").format(uv.getUvIndex());
+                        uv_value.setText(uv_index);
                         uv_risk.setText(uv.getOmsRisk());
                     } catch (InvalidProtocolBufferException e) {
                         e.printStackTrace();
@@ -151,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     };
-
 
     public void configGpioOuputValue(int pin, int value){
         Builder gpioParams = GpioParams.newBuilder();
@@ -192,66 +164,49 @@ public class MainActivity extends AppCompatActivity {
         uv.push("");
     }
 
-    public void startHumiditySensor(){
-        humidity.start();
+    public void configHumiditySensor(){
         DriverConfig.Builder config = humidity.getBasicConfig();
         HumidityParams.Builder params = HumidityParams.newBuilder();
         params.setCurrentTemperature(23.0f);
         params.setDoCalibration(true);
         config.setHumidity(params);
         humidity.config(config);
+    }
+
+
+    @Override
+    void startDrivers() {
+        humidity.start();
+        uv.start();
+        gpio.start();
+        everloop.start();
+        configHumiditySensor();
+        uv.subscribe(onUVDataCallBack);
+        gpio.subscribe(onGpioInputCallBack);
         humidity.subscribe(onHumidityDataCallBack);
     }
 
     @Override
-    protected void onResume() {
-        startHumiditySensor();
-
-        uv.start();
-        gpio.start();
-        everloop.start();
-
-        uv.subscribe(onUVDataCallBack);
-        gpio.subscribe(onGpioInputCallBack);
-
-        timerSensors = new Timer();
-        timerGpio = new Timer();
-        startTimerSensors();
-        startTimerGpio();
-
-        super.onResume();
-    }
-
-    @Override
-    protected void onStop() {
-        timerSensors.cancel();
-        timerGpio.cancel();
-        humidity.stop();
-        uv.stop();
-        everloop.stop();
-        gpio.stop();
+    void stopDrivers() {
+        mSlowTimer.cancel();
+        mFastTimer.cancel();
         gpio.unsubscribe();
         humidity.unsubscribe();
         uv.unsubscribe();
-        super.onStop();
+        gpio.stop();
+        humidity.stop();
+        uv.stop();
+        everloop.stop();
     }
 
-    public void startTimerSensors() {
-        timerSensors.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-                requestHumidityData();
-                requestUVData();
-            }
-        }, 0, 7000);
+    @Override
+    void fastUpdateDevices() {
+        requestGpioInputValue(1);
     }
 
-    public void startTimerGpio() {
-        timerGpio.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-                requestGpioInputValue(1);
-            }
-        }, 0, 500);
+    @Override
+    void slowUpdateDevices() {
+        requestHumidityData();
+        requestUVData();
     }
-
-
 }

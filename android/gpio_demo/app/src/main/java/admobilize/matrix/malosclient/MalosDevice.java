@@ -14,7 +14,7 @@ public class MalosDevice {
 
     private static final String TAG = MalosDevice.class.getSimpleName();
     private static final boolean DEBUG = Config.DEBUG;
-    private static final boolean VERBOSE = Config.DEBUG&&true;
+    private static final boolean VERBOSE = Config.DEBUG&&false;
 
     private final MalosTarget driver;
     private ZMQ.Context config_context;
@@ -121,6 +121,7 @@ public class MalosDevice {
                     if(sub_socket!=null)cb.onReceiveData(sub_socket.recv());
                 } catch (Exception e) {
                     e.printStackTrace();
+                    sub_socket=null;
                 }
             }
             sub_socket.close();
