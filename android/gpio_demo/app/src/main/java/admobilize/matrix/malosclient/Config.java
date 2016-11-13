@@ -8,7 +8,5 @@ public class Config {
     public static final boolean DEBUG = true;
     public static final boolean VERBOSE = DEBUG&&false;
 
-    public static final String CREATORIP="192.168.1.114";
-
     public static final int LED_INTENSITY_DIVISOR = 10;
 }
