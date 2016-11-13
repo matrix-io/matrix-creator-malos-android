@@ -54,9 +54,8 @@ public class MainActivity extends BaseActivity {
 
         String currentTargetIp = EasyPreference.with(this).getString(Storage.CURRENT_DEVICE, "");
 
+        initLoader();
         if(currentTargetIp.isEmpty()){
-            initLoader();
-            showLoader(R.string.msg_find_device);
             startDiscovery();
         }
         else {
@@ -67,8 +66,12 @@ public class MainActivity extends BaseActivity {
 
     }
 
-    private void startDiscovery() {
+    @Override
+    public void startDiscovery() {
         if(DEBUG)Log.i(TAG,"startDiscovery..");
+        showLoader(R.string.msg_find_device);
+        deviceIp="";
+        setTargetConfig(false);
         new Discovery(this, onDiscoveryMatrix).searchDevices();
     }
 
@@ -125,6 +128,7 @@ public class MainActivity extends BaseActivity {
                 @Override
                 public void run() {
                     try {
+                        dismissLoader();
                         Humidity humidity = Humidity.parseFrom(data);
                         if(VERBOSE)Log.d(TAG,"onHumidityDataCallBack humidity: "+humidity.getHumidity());
                         if(VERBOSE)Log.d(TAG,"onHumidityDataCallBack temperature: "+humidity.getTemperature());
@@ -167,8 +171,9 @@ public class MainActivity extends BaseActivity {
                 @Override
                 public void run() {
                     try {
-                        if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
                         dismissLoader();
+                        if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
+                        showLoader(R.string.msg_enable_sensors);
                         Driver.MalosDriverInfo matrix = Driver.MalosDriverInfo.parseFrom(data);
                         List<Driver.DriverInfo> features = matrix.getInfoList();
                         Iterator<Driver.DriverInfo> it = features.iterator();
@@ -280,4 +285,5 @@ public class MainActivity extends BaseActivity {
         requestHumidityData();
         requestUVData();
     }
+
 }

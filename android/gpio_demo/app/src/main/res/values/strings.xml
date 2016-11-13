@@ -14,5 +14,7 @@
 	<string name="msg_find_device">Searching Matrix Creator device…</string>
 	<string name="msg_loading">Loading…</string>
 	<string name="error_wifi_lan_ip">Not WiFi or Lan connection</string>
+	<string name="action_scan_devices">Scan Devices…</string>
+	<string name="msg_enable_sensors">Enabling sensors…</string>
 
 </resources>
