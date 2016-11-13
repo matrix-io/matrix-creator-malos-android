@@ -38,6 +38,7 @@ dependencies {
     compile 'org.zeromq:jeromq:0.3.5'
     testCompile 'junit:junit:4.12'
     compile 'com.google.protobuf:protobuf-lite:3.0.0'
+    compile 'com.iamhabib:easy-preference:1.0.1'
 }
 
 
