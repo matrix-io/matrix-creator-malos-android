@@ -10,5 +10,8 @@
 	<string name="relay2Label">Relay<sub>2</sub></string>
 	<string name="off">Off</string>
 	<string name="on">On</string>
+	<string name="send_to">Share with</string>
+	<string name="msg_find_device">Searching Matrix Creator device…</string>
+	<string name="msg_loading">Loading…</string>
 
 </resources>

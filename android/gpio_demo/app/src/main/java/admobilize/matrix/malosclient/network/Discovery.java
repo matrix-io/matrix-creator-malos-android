@@ -95,7 +95,7 @@ public class Discovery {
             ZMQ.Socket sub_socket = sub_context.socket(ZMQ.REQ);
             sub_socket.connect(driver.getBaseport());
             sub_socket.send("".getBytes());
-            if(DEBUG)Log.i(TAG,"subscribe with: "+driver.getBaseport());
+            if(DEBUG)Log.d(TAG,"try get config from: "+driver.getBaseport());
 
             while(!Thread.currentThread().isInterrupted()) {
                 try {

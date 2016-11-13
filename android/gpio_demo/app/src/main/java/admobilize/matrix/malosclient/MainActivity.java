@@ -2,10 +2,11 @@ package admobilize.matrix.malosclient;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import static android.widget.CompoundButton.OnCheckedChangeListener;
+
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.iamhabib.easy_preference.EasyPreference;
+
 import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.List;
@@ -13,11 +14,12 @@ import java.util.List;
 import admobilize.matrix.malosclient.malos.MalosDevice;
 import admobilize.matrix.malosclient.malos.MalosTarget;
 import admobilize.matrix.malosclient.network.Discovery;
-import admobilize.matrix.malosclient.ui.ColorLEDController;
+import admobilize.matrix.malosclient.utils.Storage;
 import matrix_malos.Driver;
 import matrix_malos.Driver.GpioParams.Builder;
 
 import static admobilize.matrix.malosclient.malos.MalosDevice.OnSubscriptionCallBack;
+import static android.widget.CompoundButton.OnCheckedChangeListener;
 import static matrix_malos.Driver.DriverConfig;
 import static matrix_malos.Driver.EverloopImage;
 import static matrix_malos.Driver.GpioParams;
@@ -26,11 +28,17 @@ import static matrix_malos.Driver.HumidityParams;
 import static matrix_malos.Driver.LedValue;
 import static matrix_malos.Driver.UV;
 
+/**
+ * Created by Antonio Vanegas @hpsaturn on 11/12/16.
+ */
+
 public class MainActivity extends BaseActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean DEBUG = Config.DEBUG;
     private static final boolean VERBOSE = Config.VERBOSE;
+
+    private String deviceIp;
 
     private MalosDevice gpio;
     private MalosDevice humidity;
@@ -44,18 +52,34 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        String currentDeviceIp = EasyPreference.with(this).getString(Storage.CURRENT_DEVICE, "");
+
+        if(currentDeviceIp.isEmpty()){
+            initLoader();
+            showLoader(R.string.msg_find_device);
+            startDiscovery();
+        }
+        else {
+            deviceIp=currentDeviceIp;
+            setTargetConfig(true);
+            initDevices();
+        }
+
+    }
+
+    private void startDiscovery() {
+        if(DEBUG)Log.i(TAG,"startDiscovery..");
+        new Discovery(this, onDiscoveryMatrixCreator).searchDevices();
+    }
+
+    private void initDevices() {
         gpio = new MalosDevice(MalosTarget.GPIO);
         humidity = new MalosDevice(MalosTarget.HUMIDITY);
         uv = new MalosDevice(MalosTarget.UV);
         everloop = new MalosDevice(MalosTarget.EVERLOOP);
 
         instanceUI();
-
-        ColorLEDController ledController = new ColorLEDController(this, 1, getResources(),true);
-        ledController.attachToView((ViewGroup) findViewById(R.id.leds1));
         outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
-
-//        new Discovery(this, onDiscoveryMatrixCreator).searchDevices();
 
     }
 
@@ -140,11 +164,13 @@ public class MainActivity extends BaseActivity {
         @Override
         public void onReceiveData(byte[] data) {
             try {
+                if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
+                dismissLoader();
                 Driver.MalosDriverInfo matrix = Driver.MalosDriverInfo.parseFrom(data);
                 List<Driver.DriverInfo> features = matrix.getInfoList();
                 Iterator<Driver.DriverInfo> it = features.iterator();
                 while(it.hasNext()){
-                    if(DEBUG)Log.i(TAG,"matrix feature: "+it.next().getDriverName());
+                    if(DEBUG)Log.d(TAG,"==> matrix feature: "+it.next().getDriverName());
                 }
             } catch (InvalidProtocolBufferException e) {
                 e.printStackTrace();
