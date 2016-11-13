@@ -89,6 +89,13 @@ public abstract class BaseActivity extends AppCompatActivity {
         }, 0, 500);
     }
 
+    public void initTimers(){
+        mSlowTimer = new Timer();
+        mFastTimer = new Timer();
+        slowTimer();
+        fastTimer();
+    }
+
     abstract void fastUpdateDevices();
 
     abstract void slowUpdateDevices();
@@ -97,10 +104,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onResume() {
         if(isTargetConfig) {
             startDrivers();
-            mSlowTimer = new Timer();
-            mFastTimer = new Timer();
-            slowTimer();
-            fastTimer();
+            initTimers();
         }
         super.onResume();
     }
