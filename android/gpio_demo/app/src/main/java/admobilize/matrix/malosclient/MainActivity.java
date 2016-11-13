@@ -47,6 +47,8 @@ public class MainActivity extends BaseActivity {
 
     private int red, green, blue;
 
+    private boolean onConfigDevice;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +74,7 @@ public class MainActivity extends BaseActivity {
         showLoader(R.string.msg_find_device);
         deviceIp="";
         setTargetConfig(false);
+        onConfigDevice=true;
         new Discovery(this, onDiscoveryMatrix).searchDevices();
     }
 
@@ -128,7 +131,10 @@ public class MainActivity extends BaseActivity {
                 @Override
                 public void run() {
                     try {
-                        dismissLoader();
+                        if(onConfigDevice&&isTargetConfig()){ // Only for new device found
+                            dismissLoader();
+                            onConfigDevice =false;
+                        }
                         Humidity humidity = Humidity.parseFrom(data);
                         if(VERBOSE)Log.d(TAG,"onHumidityDataCallBack humidity: "+humidity.getHumidity());
                         if(VERBOSE)Log.d(TAG,"onHumidityDataCallBack temperature: "+humidity.getTemperature());
@@ -173,7 +179,6 @@ public class MainActivity extends BaseActivity {
                     try {
                         dismissLoader();
                         if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
-                        showLoader(R.string.msg_enable_sensors);
                         Driver.MalosDriverInfo matrix = Driver.MalosDriverInfo.parseFrom(data);
                         List<Driver.DriverInfo> features = matrix.getInfoList();
                         Iterator<Driver.DriverInfo> it = features.iterator();
@@ -184,6 +189,7 @@ public class MainActivity extends BaseActivity {
                         EasyPreference.with(MainActivity.this).addString(Storage.CURRENT_DEVICE,host).save();
                         deviceIp=host;
                         setTargetConfig(true);
+                        showLoader(R.string.msg_enable_sensors);
                         initDevices();
                         startDrivers();
                         initTimers();
