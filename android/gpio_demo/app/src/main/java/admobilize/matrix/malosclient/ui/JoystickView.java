@@ -1,4 +1,4 @@
-package admobilize.matrix.malosclient;
+package admobilize.matrix.malosclient.ui;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -8,6 +8,8 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+
+import admobilize.matrix.malosclient.R;
 
 public class JoystickView extends View {
 

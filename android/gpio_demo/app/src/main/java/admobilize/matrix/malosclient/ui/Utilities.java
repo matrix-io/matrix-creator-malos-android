@@ -1,4 +1,4 @@
-package admobilize.matrix.malosclient;
+package admobilize.matrix.malosclient.ui;
 
 import android.graphics.drawable.Drawable;
 

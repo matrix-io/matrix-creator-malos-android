@@ -1,8 +1,10 @@
-package admobilize.matrix.malosclient;
+package admobilize.matrix.malosclient.malos;
 
 import android.os.AsyncTask;
 import android.util.Log;
 import org.zeromq.ZMQ;
+
+import admobilize.matrix.malosclient.Config;
 
 import static matrix_malos.Driver.*;
 
@@ -31,6 +33,10 @@ public class MalosDevice {
         this.driver=new MalosTarget(malosTarget);
     }
 
+    public MalosDevice(int malosTarget, String host) {
+        this.driver=new MalosTarget(malosTarget,host);
+    }
+
     public void start(){
         new ZeroMQConnect().execute();
     }
@@ -40,7 +46,7 @@ public class MalosDevice {
     }
 
     public void subscribe(OnSubscriptionCallBack cb){
-         new Thread(new ZeroMQSubscription(cb)).start();
+        new Thread(new ZeroMQSubscription(cb)).start();
     }
 
     public void unsubscribe (){

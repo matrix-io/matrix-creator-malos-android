@@ -14,11 +14,11 @@
         android:clickable="true"
         android:text="@string/ledLabel" />
 
-    <admobilize.matrix.malosclient.VerticalSlider
+    <admobilize.matrix.malosclient.ui.VerticalSlider
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_weight="1"></admobilize.matrix.malosclient.VerticalSlider>
+        android:layout_weight="1"></admobilize.matrix.malosclient.ui.VerticalSlider>
 
     <TextView
         style="@style/DemoKitLEDText"

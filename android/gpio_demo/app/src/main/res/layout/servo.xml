@@ -10,9 +10,9 @@
         android:layout_height="wrap_content"
         android:text="@string/servo1Label"></TextView>
 
-    <admobilize.matrix.malosclient.Slider
+    <admobilize.matrix.malosclient.ui.Slider
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-7dip"></admobilize.matrix.malosclient.Slider>
+        android:layout_marginTop="-7dip"></admobilize.matrix.malosclient.ui.Slider>
 </LinearLayout>
 

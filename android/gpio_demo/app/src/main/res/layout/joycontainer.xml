@@ -16,11 +16,11 @@
         android:gravity="center"
         android:text="Joystick"></TextView>
 
-    <admobilize.matrix.malosclient.JoystickView
+    <admobilize.matrix.malosclient.ui.JoystickView
         android:id="@+id/joystickView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
-        android:src="@drawable/joystick_background"></admobilize.matrix.malosclient.JoystickView>
+        android:src="@drawable/joystick_background"></admobilize.matrix.malosclient.ui.JoystickView>
 </LinearLayout>
 

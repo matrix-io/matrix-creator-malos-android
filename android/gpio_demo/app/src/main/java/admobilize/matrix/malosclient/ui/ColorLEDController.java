@@ -1,18 +1,20 @@
-package admobilize.matrix.malosclient;
+package admobilize.matrix.malosclient.ui;
 
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.SubscriptSpan;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 
-import admobilize.matrix.malosclient.Slider.SliderPositionListener;
+import admobilize.matrix.malosclient.Config;
+import admobilize.matrix.malosclient.MainActivity;
+import admobilize.matrix.malosclient.R;
+import admobilize.matrix.malosclient.ui.Slider.SliderPositionListener;
 
 public class ColorLEDController {
 
