@@ -17,12 +17,7 @@ public class MalosTarget {
     private int baseport;
     private String host;
 
-    public MalosTarget(int baseport) {
-        this.baseport = baseport;
-        this.host=Config.CREATORIP;
-    }
-
-    public MalosTarget(int baseport,String host) {
+    public MalosTarget(int baseport, String host) {
         this.baseport = baseport;
         this.host=host;
     }
@@ -43,4 +38,7 @@ public class MalosTarget {
         return "tcp://"+host+":"+(baseport+3);
     }
 
+    public String getHost() {
+        return host;
+    }
 }

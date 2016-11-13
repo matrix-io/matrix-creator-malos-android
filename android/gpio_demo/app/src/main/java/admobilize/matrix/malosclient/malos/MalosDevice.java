@@ -29,10 +29,6 @@ public class MalosDevice {
         void onReceiveData(byte[] data);
     }
 
-    public MalosDevice(int malosTarget) {
-        this.driver=new MalosTarget(malosTarget);
-    }
-
     public MalosDevice(int malosTarget, String host) {
         this.driver=new MalosTarget(malosTarget,host);
     }
