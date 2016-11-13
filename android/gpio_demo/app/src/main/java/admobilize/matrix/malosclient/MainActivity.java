@@ -7,9 +7,17 @@ import android.widget.CompoundButton;
 import static android.widget.CompoundButton.OnCheckedChangeListener;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.text.DecimalFormat;
+import java.util.Iterator;
+import java.util.List;
+
+import admobilize.matrix.malosclient.malos.MalosDevice;
+import admobilize.matrix.malosclient.malos.MalosTarget;
+import admobilize.matrix.malosclient.network.Discovery;
+import admobilize.matrix.malosclient.ui.ColorLEDController;
+import matrix_malos.Driver;
 import matrix_malos.Driver.GpioParams.Builder;
 
-import static admobilize.matrix.malosclient.MalosDevice.OnSubscriptionCallBack;
+import static admobilize.matrix.malosclient.malos.MalosDevice.OnSubscriptionCallBack;
 import static matrix_malos.Driver.DriverConfig;
 import static matrix_malos.Driver.EverloopImage;
 import static matrix_malos.Driver.GpioParams;
@@ -46,6 +54,8 @@ public class MainActivity extends BaseActivity {
         ColorLEDController ledController = new ColorLEDController(this, 1, getResources(),true);
         ledController.attachToView((ViewGroup) findViewById(R.id.leds1));
         outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
+
+//        new Discovery(this, onDiscoveryMatrixCreator).searchDevices();
 
     }
 
@@ -123,6 +133,22 @@ public class MainActivity extends BaseActivity {
                     }
                 }
             });
+        }
+    };
+
+    private OnSubscriptionCallBack onDiscoveryMatrixCreator = new OnSubscriptionCallBack() {
+        @Override
+        public void onReceiveData(byte[] data) {
+            try {
+                Driver.MalosDriverInfo matrix = Driver.MalosDriverInfo.parseFrom(data);
+                List<Driver.DriverInfo> features = matrix.getInfoList();
+                Iterator<Driver.DriverInfo> it = features.iterator();
+                while(it.hasNext()){
+                    if(DEBUG)Log.i(TAG,"matrix feature: "+it.next().getDriverName());
+                }
+            } catch (InvalidProtocolBufferException e) {
+                e.printStackTrace();
+            }
         }
     };
 
