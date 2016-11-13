@@ -15,6 +15,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteOrder;
 
 import admobilize.matrix.malosclient.Config;
+import admobilize.matrix.malosclient.R;
 import admobilize.matrix.malosclient.malos.MalosDevice;
 import admobilize.matrix.malosclient.malos.MalosTarget;
 
@@ -30,17 +31,22 @@ public class Discovery {
     private static final boolean DEBUG = Config.DEBUG;
     private static final boolean VERBOSE = Config.VERBOSE;
 
-    private final MalosDevice.OnSubscriptionCallBack callback;
+    private final OnDiscoveryMatrixDevice callback;
 
     private Context ctx;
 
-    public Discovery(Context ctx, MalosDevice.OnSubscriptionCallBack cb) {
+    public Discovery(Context ctx, OnDiscoveryMatrixDevice cb) {
         this.ctx = ctx;
         this.callback=cb;
     }
 
     public void searchDevices(){
         new FindDevices().execute();
+    }
+
+    public interface OnDiscoveryMatrixDevice{
+        void onFoundedMatrixDevice(String host, byte[]data);
+        void onDiscoveryError(String msgError);
     }
 
     private class FindDevices extends AsyncTask<Void,Void,Void>{
@@ -65,11 +71,11 @@ public class Discovery {
                             if (VERBOSE) Log.d(TAG, "found host: "+pingAddr.getHostAddress());
                             // request MALOS Device Info for possible compatible host
                             MalosTarget driver = new MalosTarget(MalosTarget.DEVICEINFO, pingAddr.getHostAddress());
-                            new Thread(new ZeroMQRequest(callback, driver)).start();
+                            new Thread(new ZeroMQRequest(driver)).start();
                         }
                     }
                 }else{
-
+                    if(DEBUG)Log.e(TAG,"Android not have connection!");
                 }
             } catch (UnknownHostException ex) {
             } catch (IOException ex) {
@@ -81,11 +87,9 @@ public class Discovery {
 
     private class ZeroMQRequest implements Runnable {
 
-        private final MalosDevice.OnSubscriptionCallBack cb;
         private final MalosTarget driver;
 
-        public ZeroMQRequest(MalosDevice.OnSubscriptionCallBack cb, MalosTarget driver) {
-            this.cb=cb;
+        public ZeroMQRequest(MalosTarget driver) {
             this.driver=driver;
         }
 
@@ -99,7 +103,9 @@ public class Discovery {
 
             while(!Thread.currentThread().isInterrupted()) {
                 try {
-                    if(sub_socket!=null)cb.onReceiveData(sub_socket.recv());
+                    if(sub_socket!=null){
+                        callback.onFoundedMatrixDevice(driver.getHost(),sub_socket.recv());
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     sub_socket=null;
@@ -127,6 +133,7 @@ public class Discovery {
         } catch (UnknownHostException ex) {
             if(DEBUG)Log.e("WIFIIP", "Unable to get host address.");
             ipAddressString = null;
+            callback.onDiscoveryError(ctx.getString(R.string.error_wifi_lan_ip));
         }
 
         return ipAddressString;

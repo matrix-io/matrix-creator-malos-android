@@ -52,15 +52,15 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String currentDeviceIp = EasyPreference.with(this).getString(Storage.CURRENT_DEVICE, "");
+        String currentTargetIp = EasyPreference.with(this).getString(Storage.CURRENT_DEVICE, "");
 
-        if(currentDeviceIp.isEmpty()){
+        if(currentTargetIp.isEmpty()){
             initLoader();
             showLoader(R.string.msg_find_device);
             startDiscovery();
         }
         else {
-            deviceIp=currentDeviceIp;
+            deviceIp=currentTargetIp;
             setTargetConfig(true);
             initDevices();
         }
@@ -69,14 +69,14 @@ public class MainActivity extends BaseActivity {
 
     private void startDiscovery() {
         if(DEBUG)Log.i(TAG,"startDiscovery..");
-        new Discovery(this, onDiscoveryMatrixCreator).searchDevices();
+        new Discovery(this, onDiscoveryMatrix).searchDevices();
     }
 
     private void initDevices() {
-        gpio = new MalosDevice(MalosTarget.GPIO);
-        humidity = new MalosDevice(MalosTarget.HUMIDITY);
-        uv = new MalosDevice(MalosTarget.UV);
-        everloop = new MalosDevice(MalosTarget.EVERLOOP);
+        gpio = new MalosDevice(MalosTarget.GPIO, deviceIp);
+        humidity = new MalosDevice(MalosTarget.HUMIDITY, deviceIp);
+        uv = new MalosDevice(MalosTarget.UV, deviceIp);
+        everloop = new MalosDevice(MalosTarget.EVERLOOP, deviceIp);
 
         instanceUI();
         outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
@@ -160,21 +160,39 @@ public class MainActivity extends BaseActivity {
         }
     };
 
-    private OnSubscriptionCallBack onDiscoveryMatrixCreator = new OnSubscriptionCallBack() {
+    private Discovery.OnDiscoveryMatrixDevice onDiscoveryMatrix = new Discovery.OnDiscoveryMatrixDevice() {
         @Override
-        public void onReceiveData(byte[] data) {
-            try {
-                if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
-                dismissLoader();
-                Driver.MalosDriverInfo matrix = Driver.MalosDriverInfo.parseFrom(data);
-                List<Driver.DriverInfo> features = matrix.getInfoList();
-                Iterator<Driver.DriverInfo> it = features.iterator();
-                while(it.hasNext()){
-                    if(DEBUG)Log.d(TAG,"==> matrix feature: "+it.next().getDriverName());
+        public void onFoundedMatrixDevice(final String host, final byte[] data) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
+                        dismissLoader();
+                        Driver.MalosDriverInfo matrix = Driver.MalosDriverInfo.parseFrom(data);
+                        List<Driver.DriverInfo> features = matrix.getInfoList();
+                        Iterator<Driver.DriverInfo> it = features.iterator();
+                        while(it.hasNext()){
+                            Driver.DriverInfo driverInfo = it.next();
+                            if(DEBUG)Log.d(TAG,"==> matrix feature: ["+driverInfo.getBasePort()+"] "+driverInfo.getDriverName());
+                        }
+                        EasyPreference.with(MainActivity.this).addString(Storage.CURRENT_DEVICE,host).save();
+                        deviceIp=host;
+                        setTargetConfig(true);
+                        initDevices();
+                        startDrivers();
+                        initTimers();
+                    } catch (InvalidProtocolBufferException e) {
+                        e.printStackTrace();
+                    }
                 }
-            } catch (InvalidProtocolBufferException e) {
-                e.printStackTrace();
-            }
+            });
+
+        }
+
+        @Override
+        public void onDiscoveryError(String msgError) {
+            // TODO: show snack or dialog
         }
     };
 

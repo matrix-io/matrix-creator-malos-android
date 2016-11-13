@@ -13,5 +13,6 @@
 	<string name="send_to">Share with</string>
 	<string name="msg_find_device">Searching Matrix Creator device…</string>
 	<string name="msg_loading">Loading…</string>
+	<string name="error_wifi_lan_ip">Not WiFi or Lan connection</string>
 
 </resources>
