@@ -33,12 +33,18 @@ public class MalosDevice {
         String info="\n[ipAddress] "+ipAddress;
         try {
             Driver.MalosDriverInfo driverInfo = Driver.MalosDriverInfo.parseFrom(data);
-            info=info+"\n[Features]";
+            info=info+"\n\n=== Features: ===\n";
+            info=info+"\n[Port]\t[Delay]\t[Ping]\t[Timeout]\t[DriverName]\n";
             List<Driver.DriverInfo> features = driverInfo.getInfoList();
             Iterator<Driver.DriverInfo> it = features.iterator();
             while (it.hasNext()) {
                 Driver.DriverInfo driver = it.next();
-                String feature="==> matrix feature: [" + driver.getBasePort() + "] " + driver.getDriverName();
+                String feature="" +
+                        "["+driver.getBasePort()+"]\t"+
+                        "["+driver.getDelayBetweenUpdates()+"]\t"+
+                        "["+driver.getNeedsPings()+"]\t"+
+                        "["+driver.getTimeoutAfterLastPing()+"]\t"+
+                        driver.getDriverName();
                 if(DEBUG) Log.d(TAG,feature);
                 info=info+"\n"+feature;
             }
