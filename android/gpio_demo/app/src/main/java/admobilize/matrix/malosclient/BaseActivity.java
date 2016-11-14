@@ -2,6 +2,10 @@ package admobilize.matrix.malosclient;
 
 import android.app.ProgressDialog;
 import android.graphics.drawable.Drawable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -167,9 +171,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_scan_devices) {
             startDiscovery();
+            return true;
+        }
+        if (id == R.id.action_get_device_info) {
+            showDeviceInfo();
             return true;
         }
 
@@ -177,6 +184,110 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     abstract void startDiscovery();
+    abstract void showDeviceInfo();
+
+    public void showFragment(Fragment fragment, String fragmentTag, boolean toStack) {
+
+        try {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.content_default, fragment, fragmentTag);
+            if (toStack) ft.addToBackStack(fragmentTag);
+            ft.commitAllowingStateLoss();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void showFragment(Fragment fragment, String fragmentTag, boolean toStack, int content) {
+
+        try {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(content, fragment, fragmentTag);
+            if (toStack) ft.addToBackStack(fragmentTag);
+            ft.commitAllowingStateLoss();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void showFragmentFull(Fragment fragment, String fragmentTag, boolean toStack) {
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.content_default, fragment, fragmentTag);
+        if (toStack) ft.addToBackStack(fragmentTag);
+        ft.commitAllowingStateLoss();
+
+    }
+
+    public void showDialog(Fragment fragment, String fragmentTag){
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.add(fragment, fragmentTag);
+        ft.show(fragment);
+        ft.commitAllowingStateLoss();
+    }
+
+    public void popBackStackSecure(String TAG) {
+        try {
+            if (DEBUG) Log.d(TAG, "popBackStackSecure to: " + TAG);
+            getSupportFragmentManager().popBackStack(TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void popBackLastFragment() {
+        if (getSupportFragmentManager().getBackStackEntryCount() != 0) {
+            if (DEBUG) Log.d(TAG, "onBackPressed popBackStack for:" + getLastFragmentName());
+            getSupportFragmentManager().popBackStack();
+        }
+    }
+
+
+    public void removeFragment(Fragment fragment) {
+        try {
+            if (DEBUG) Log.w(TAG, "removing fragment: " + fragment.getClass().getSimpleName());
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.remove(fragment).commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getLastFragmentName() {
+        try {
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0) return "";
+            FragmentManager fm = getSupportFragmentManager();
+            return fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public boolean isFragmentInStack(String tag) {
+        try {
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0) return false;
+            FragmentManager fm = getSupportFragmentManager();
+            Fragment match = fm.findFragmentByTag(tag);
+            if (match!=null)return true;
+            else return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void showSnackLong(String msg) {
+        Snackbar.make(this.getCurrentFocus(), msg, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+    }
+
+    public void showSnackLong(int msg) {
+        Snackbar.make(this.getCurrentFocus(), msg, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+    }
+
 
 
 

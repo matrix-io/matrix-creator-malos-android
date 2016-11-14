@@ -24,29 +24,26 @@ public class MalosDevice {
 
     private String deviceInfo;
 
-    private Driver.MalosDriverInfo driverInfo;
-
     public MalosDevice(String ipAddress, byte[] data) {
-        try {
             this.ipAddress = ipAddress;
-            this.driverInfo = Driver.MalosDriverInfo.parseFrom(data);
-            this.deviceInfo = generateDeviceInfo();
-        } catch (InvalidProtocolBufferException e) {
-            this.driverInfo = null;
-            e.printStackTrace();
-        }
+            this.deviceInfo = generateDeviceInfo(data);
     }
 
-    private String generateDeviceInfo(){
+    private String generateDeviceInfo(byte[] data){
         String info="\n[ipAddress] "+ipAddress;
-        info=info+"\n[Features]";
-        List<Driver.DriverInfo> features = driverInfo.getInfoList();
-        Iterator<Driver.DriverInfo> it = features.iterator();
-        while (it.hasNext()) {
-            Driver.DriverInfo driverInfo = it.next();
-            String feature="==> matrix feature: [" + driverInfo.getBasePort() + "] " + driverInfo.getDriverName();
-            if(DEBUG) Log.d(TAG,feature);
-            info=info+"\n"+feature;
+        try {
+            Driver.MalosDriverInfo driverInfo = Driver.MalosDriverInfo.parseFrom(data);
+            info=info+"\n[Features]";
+            List<Driver.DriverInfo> features = driverInfo.getInfoList();
+            Iterator<Driver.DriverInfo> it = features.iterator();
+            while (it.hasNext()) {
+                Driver.DriverInfo driver = it.next();
+                String feature="==> matrix feature: [" + driver.getBasePort() + "] " + driver.getDriverName();
+                if(DEBUG) Log.d(TAG,feature);
+                info=info+"\n"+feature;
+            }
+        } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
         }
         return info;
     }

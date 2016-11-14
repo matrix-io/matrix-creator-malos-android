@@ -128,7 +128,7 @@
 
             <TextView
                 style="@style/DemoKitControlLightLowerLabelConst"
-                android:text=" radation"></TextView>
+                android:text=" rad."></TextView>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

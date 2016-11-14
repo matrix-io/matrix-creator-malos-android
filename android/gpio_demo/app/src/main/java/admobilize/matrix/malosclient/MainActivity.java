@@ -3,7 +3,6 @@ package admobilize.matrix.malosclient;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.CompoundButton;
-
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.iamhabib.easy_preference.EasyPreference;
 
@@ -13,6 +12,7 @@ import admobilize.matrix.malosclient.malos.MalosDevice;
 import admobilize.matrix.malosclient.malos.MalosDrive;
 import admobilize.matrix.malosclient.malos.MalosTarget;
 import admobilize.matrix.malosclient.network.Discovery;
+import admobilize.matrix.malosclient.ui.InfoFragment;
 import admobilize.matrix.malosclient.utils.Storage;
 import matrix_malos.Driver.GpioParams.Builder;
 
@@ -36,7 +36,9 @@ public class MainActivity extends BaseActivity {
     private static final boolean DEBUG = Config.DEBUG;
     private static final boolean VERBOSE = Config.VERBOSE;
 
+    private MalosDevice currentDevice;
     private String deviceIp;
+    private boolean onConfigDevice;
 
     private MalosDrive gpio;
     private MalosDrive humidity;
@@ -45,21 +47,20 @@ public class MainActivity extends BaseActivity {
 
     private int red, green, blue;
 
-    private boolean onConfigDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        String currentTargetIp = EasyPreference.with(this).getString(Storage.CURRENT_DEVICE, "");
-
         initLoader();
-        if(currentTargetIp.isEmpty()){
+
+        MalosDevice matrix = EasyPreference.with(this).getObject(Storage.CURRENT_DEVICE,MalosDevice.class);
+        if(matrix==null){
             startDiscovery();
         }
         else {
-            deviceIp=currentTargetIp;
+            deviceIp=matrix.getIpAddress();
+            currentDevice=matrix;
             setTargetConfig(true);
             initDevices();
         }
@@ -75,6 +76,35 @@ public class MainActivity extends BaseActivity {
         onConfigDevice=true;
         new Discovery(this, onDiscoveryMatrix).searchDevices();
     }
+
+    private Discovery.OnDiscoveryMatrixDevice onDiscoveryMatrix = new Discovery.OnDiscoveryMatrixDevice() {
+        @Override
+        public void onFoundedMatrixDevice(final MalosDevice device) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    dismissLoader();
+                    if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
+                    String host=device.getIpAddress();
+                    EasyPreference.with(MainActivity.this).addObject(Storage.CURRENT_DEVICE,device).save();
+                    deviceIp=host;
+                    currentDevice=device;
+                    setTargetConfig(true);
+                    showLoader(R.string.msg_enable_sensors);
+                    initDevices();
+                    startDrivers();
+                    initTimers();
+                }
+            });
+
+        }
+
+        @Override
+        public void onDiscoveryError(String msgError) {
+            // TODO: show snack or dialog
+        }
+    };
+
 
     private void initDevices() {
         gpio = new MalosDrive(MalosTarget.GPIO, deviceIp);
@@ -168,33 +198,6 @@ public class MainActivity extends BaseActivity {
         }
     };
 
-    private Discovery.OnDiscoveryMatrixDevice onDiscoveryMatrix = new Discovery.OnDiscoveryMatrixDevice() {
-        @Override
-        public void onFoundedMatrixDevice(final MalosDevice device) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    dismissLoader();
-                    if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
-                    String host=device.getIpAddress();
-                    EasyPreference.with(MainActivity.this).addString(Storage.CURRENT_DEVICE,host).save();
-                    deviceIp=host;
-                    setTargetConfig(true);
-                    showLoader(R.string.msg_enable_sensors);
-                    initDevices();
-                    startDrivers();
-                    initTimers();
-                }
-            });
-
-        }
-
-        @Override
-        public void onDiscoveryError(String msgError) {
-            // TODO: show snack or dialog
-        }
-    };
-
     public void configGpioOuputValue(int pin, int value){
         Builder gpioParams = GpioParams.newBuilder();
         gpioParams.setPin(pin);
@@ -279,5 +282,14 @@ public class MainActivity extends BaseActivity {
         requestHumidityData();
         requestUVData();
     }
+
+    @Override
+    void showDeviceInfo() {
+        if(isTargetConfig()) {
+            InfoFragment infoFragment = InfoFragment.newInstance(currentDevice.getDeviceInfo());
+            showDialog(infoFragment,InfoFragment.TAG);
+        }
+    }
+
 
 }

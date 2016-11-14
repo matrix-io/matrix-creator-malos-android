@@ -16,5 +16,6 @@
 	<string name="error_wifi_lan_ip">Not WiFi or Lan connection</string>
 	<string name="action_scan_devices">Scan Devices…</string>
 	<string name="msg_enable_sensors">Enabling sensors…</string>
+	<string name="action_get_device_info">Device Info…</string>
 
 </resources>
