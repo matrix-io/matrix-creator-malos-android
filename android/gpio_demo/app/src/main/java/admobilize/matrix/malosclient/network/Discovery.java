@@ -45,7 +45,7 @@ public class Discovery {
     }
 
     public interface OnDiscoveryMatrixDevice{
-        void onFoundedMatrixDevice(String host, byte[]data);
+        void onFoundedMatrixDevice(MalosDevice device);
         void onDiscoveryError(String msgError);
     }
 
@@ -70,8 +70,8 @@ public class Discovery {
                         if (pingAddr.isReachable(iFace, 200, 50)) {
                             if (VERBOSE) Log.d(TAG, "found host: "+pingAddr.getHostAddress());
                             // request MALOS Device Info for possible compatible host
-                            MalosTarget driver = new MalosTarget(MalosTarget.DEVICEINFO, pingAddr.getHostAddress());
-                            new Thread(new ZeroMQRequest(driver)).start();
+                            MalosTarget target = new MalosTarget(MalosTarget.DEVICEINFO, pingAddr.getHostAddress());
+                            new Thread(new ZeroMQRequest(target)).start();
                         }
                     }
                 }else{
@@ -87,24 +87,24 @@ public class Discovery {
 
     private class ZeroMQRequest implements Runnable {
 
-        private final MalosTarget driver;
+        private final MalosTarget target;
 
-        public ZeroMQRequest(MalosTarget driver) {
-            this.driver=driver;
+        public ZeroMQRequest(MalosTarget target) {
+            this.target =target;
         }
 
         @Override
         public void run() {
             ZMQ.Context sub_context = ZMQ.context(1);
             ZMQ.Socket sub_socket = sub_context.socket(ZMQ.REQ);
-            sub_socket.connect(driver.getBaseport());
+            sub_socket.connect(target.getBaseport());
             sub_socket.send("".getBytes());
-            if(DEBUG)Log.d(TAG,"try get config from: "+driver.getBaseport());
+            if(DEBUG)Log.d(TAG,"try get config from: "+ target.getBaseport());
 
             while(!Thread.currentThread().isInterrupted()) {
                 try {
                     if(sub_socket!=null){
-                        callback.onFoundedMatrixDevice(driver.getHost(),sub_socket.recv());
+                        callback.onFoundedMatrixDevice(new MalosDevice(target.getHost(),sub_socket.recv()));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -8,17 +8,15 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.iamhabib.easy_preference.EasyPreference;
 
 import java.text.DecimalFormat;
-import java.util.Iterator;
-import java.util.List;
 
 import admobilize.matrix.malosclient.malos.MalosDevice;
+import admobilize.matrix.malosclient.malos.MalosDrive;
 import admobilize.matrix.malosclient.malos.MalosTarget;
 import admobilize.matrix.malosclient.network.Discovery;
 import admobilize.matrix.malosclient.utils.Storage;
-import matrix_malos.Driver;
 import matrix_malos.Driver.GpioParams.Builder;
 
-import static admobilize.matrix.malosclient.malos.MalosDevice.OnSubscriptionCallBack;
+import static admobilize.matrix.malosclient.malos.MalosDrive.OnSubscriptionCallBack;
 import static android.widget.CompoundButton.OnCheckedChangeListener;
 import static matrix_malos.Driver.DriverConfig;
 import static matrix_malos.Driver.EverloopImage;
@@ -40,10 +38,10 @@ public class MainActivity extends BaseActivity {
 
     private String deviceIp;
 
-    private MalosDevice gpio;
-    private MalosDevice humidity;
-    private MalosDevice uv;
-    private MalosDevice everloop;
+    private MalosDrive gpio;
+    private MalosDrive humidity;
+    private MalosDrive uv;
+    private MalosDrive everloop;
 
     private int red, green, blue;
 
@@ -79,10 +77,10 @@ public class MainActivity extends BaseActivity {
     }
 
     private void initDevices() {
-        gpio = new MalosDevice(MalosTarget.GPIO, deviceIp);
-        humidity = new MalosDevice(MalosTarget.HUMIDITY, deviceIp);
-        uv = new MalosDevice(MalosTarget.UV, deviceIp);
-        everloop = new MalosDevice(MalosTarget.EVERLOOP, deviceIp);
+        gpio = new MalosDrive(MalosTarget.GPIO, deviceIp);
+        humidity = new MalosDrive(MalosTarget.HUMIDITY, deviceIp);
+        uv = new MalosDrive(MalosTarget.UV, deviceIp);
+        everloop = new MalosDrive(MalosTarget.EVERLOOP, deviceIp);
 
         instanceUI();
         outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
@@ -172,30 +170,20 @@ public class MainActivity extends BaseActivity {
 
     private Discovery.OnDiscoveryMatrixDevice onDiscoveryMatrix = new Discovery.OnDiscoveryMatrixDevice() {
         @Override
-        public void onFoundedMatrixDevice(final String host, final byte[] data) {
+        public void onFoundedMatrixDevice(final MalosDevice device) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        dismissLoader();
-                        if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
-                        Driver.MalosDriverInfo matrix = Driver.MalosDriverInfo.parseFrom(data);
-                        List<Driver.DriverInfo> features = matrix.getInfoList();
-                        Iterator<Driver.DriverInfo> it = features.iterator();
-                        while(it.hasNext()){
-                            Driver.DriverInfo driverInfo = it.next();
-                            if(DEBUG)Log.d(TAG,"==> matrix feature: ["+driverInfo.getBasePort()+"] "+driverInfo.getDriverName());
-                        }
-                        EasyPreference.with(MainActivity.this).addString(Storage.CURRENT_DEVICE,host).save();
-                        deviceIp=host;
-                        setTargetConfig(true);
-                        showLoader(R.string.msg_enable_sensors);
-                        initDevices();
-                        startDrivers();
-                        initTimers();
-                    } catch (InvalidProtocolBufferException e) {
-                        e.printStackTrace();
-                    }
+                    dismissLoader();
+                    if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
+                    String host=device.getIpAddress();
+                    EasyPreference.with(MainActivity.this).addString(Storage.CURRENT_DEVICE,host).save();
+                    deviceIp=host;
+                    setTargetConfig(true);
+                    showLoader(R.string.msg_enable_sensors);
+                    initDevices();
+                    startDrivers();
+                    initTimers();
                 }
             });
 
