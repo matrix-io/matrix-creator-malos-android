@@ -253,7 +253,7 @@ public class MainActivity extends BaseActivity {
         uv.start();
         gpio.start();
         everloop.start();
-        configHumiditySensor();
+        //configHumiditySensor();
         uv.subscribe(onUVDataCallBack);
         gpio.subscribe(onGpioInputCallBack);
         humidity.subscribe(onHumidityDataCallBack);
