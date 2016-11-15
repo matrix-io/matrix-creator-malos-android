@@ -2,25 +2,55 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="480dp"
+    android:layout_marginTop="@dimen/activity_vertical_margin"
     android:background="@drawable/background_holo_dark"
     android:elevation="10dp"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    >
+    android:paddingTop="@dimen/activity_vertical_margin">
 
     <LinearLayout
+        android:id="@+id/ll_ipinput_title"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp">
 
         <TextView
-            android:id="@+id/tv_infofragment_info"
-            style="@style/DemoKitControlLightLowerLabel"
-            android:textSize="14sp"
+            android:id="@+id/tv_ipinput_title"
+            style="@style/DemoKitTextBase"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
+            android:layout_height="wrap_content"
+            android:text="@string/ipinput_title"
+            android:textAlignment="center" />
     </LinearLayout>
+
+    <EditText
+        android:id="@+id/ed_ipinput_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ll_ipinput_title"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="30dp"
+        android:backgroundTint="@color/blue"
+        android:gravity="center"
+        android:hint="@string/ipinput_hint"
+        android:lines="1"
+        android:text="192.168.30.20"
+        android:textColor="@color/white"
+        android:textColorHighlight="@color/white"
+        android:textColorHint="@color/blue"
+        android:textSize="28sp"
+        android:typeface="sans" />
+
+    <Button
+        android:id="@+id/bt_ipinput_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ed_ipinput_input"
+        android:layout_marginTop="30dp"
+        android:backgroundTint="@color/blue"
+        android:text="@string/ipinput_button_confirm" />
 
 </RelativeLayout>
