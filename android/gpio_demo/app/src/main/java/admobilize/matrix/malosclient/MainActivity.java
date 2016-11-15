@@ -134,7 +134,7 @@ public class MainActivity extends BaseActivity {
 
     private OnSubscriptionCallBack onGpioInputCallBack = new OnSubscriptionCallBack() {
         @Override
-        public void onReceiveData(final byte[] data) {
+        public void onReceiveData(String host, final byte[] data) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -154,7 +154,7 @@ public class MainActivity extends BaseActivity {
 
     private OnSubscriptionCallBack onHumidityDataCallBack = new OnSubscriptionCallBack() {
         @Override
-        public void onReceiveData(final byte[] data) {
+        public void onReceiveData(String host, final byte[] data) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -179,7 +179,7 @@ public class MainActivity extends BaseActivity {
 
     private OnSubscriptionCallBack onUVDataCallBack = new OnSubscriptionCallBack() {
         @Override
-        public void onReceiveData(final byte[] data) {
+        public void onReceiveData(String host, final byte[] data) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

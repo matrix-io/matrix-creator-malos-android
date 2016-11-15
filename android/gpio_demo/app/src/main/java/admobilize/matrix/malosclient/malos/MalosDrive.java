@@ -26,7 +26,7 @@ public class MalosDrive {
     private ZMQ.Socket push_socket;
 
     public interface OnSubscriptionCallBack {
-        void onReceiveData(byte[] data);
+        void onReceiveData(String host, byte[] data);
     }
 
     public MalosDrive(int malosTarget, String host) {
@@ -49,6 +49,10 @@ public class MalosDrive {
         new ZeroMQUnsubscribe().execute();
     }
 
+    public void request (OnSubscriptionCallBack cb) {
+        new Thread(new ZeroMQRequest(cb)).start();
+    }
+
     public void push (String data){
         new ZeroMQPush().execute(data);
     }
@@ -68,11 +72,6 @@ public class MalosDrive {
             return null;
         }
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-//            new ZeroMQConfig(getBasicConfig()).execute();
-            super.onPostExecute(aVoid);
-        }
     }
 
     public DriverConfig.Builder getBasicConfig() {
@@ -121,7 +120,7 @@ public class MalosDrive {
 
             while(!Thread.currentThread().isInterrupted()) {
                 try {
-                    if(sub_socket!=null)cb.onReceiveData(sub_socket.recv());
+                    if(sub_socket!=null)cb.onReceiveData(target.getHost(),sub_socket.recv());
                 } catch (Exception e) {
                     e.printStackTrace();
                     sub_socket=null;
@@ -141,6 +140,39 @@ public class MalosDrive {
             return null;
         }
     }
+
+    private class ZeroMQRequest implements Runnable {
+
+        private final OnSubscriptionCallBack cb;
+
+        public ZeroMQRequest(OnSubscriptionCallBack cb) {
+            this.cb=cb;
+        }
+
+        @Override
+        public void run() {
+            ZMQ.Context sub_context = ZMQ.context(1);
+            ZMQ.Socket sub_socket = sub_context.socket(ZMQ.REQ);
+            sub_socket.connect(target.getBaseport());
+            sub_socket.setLinger(0);
+            sub_socket.send("".getBytes());
+            if(DEBUG)Log.d(TAG,"try get config from: "+ target.getBaseport());
+
+            while(!Thread.currentThread().isInterrupted()) {
+                try {
+                    if(sub_socket!=null){
+                        cb.onReceiveData(target.getHost(),sub_socket.recv());
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    sub_socket=null;
+                }
+            }
+            sub_socket.close();
+            sub_context.close();
+        }
+    }
+
 
     private class ZeroMQPush extends AsyncTask<String, Void, Void> {
         @Override

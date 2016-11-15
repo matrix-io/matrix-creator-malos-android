@@ -5,8 +5,6 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import org.zeromq.ZMQ;
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -17,6 +15,7 @@ import java.nio.ByteOrder;
 import admobilize.matrix.malosclient.Config;
 import admobilize.matrix.malosclient.R;
 import admobilize.matrix.malosclient.malos.MalosDevice;
+import admobilize.matrix.malosclient.malos.MalosDrive;
 import admobilize.matrix.malosclient.malos.MalosTarget;
 
 import static android.content.Context.WIFI_SERVICE;
@@ -65,57 +64,33 @@ public class Discovery {
                         // build the next IP address
                         ipWifi = ipWifi.substring(0, ipWifi.lastIndexOf('.') + 1) + i;
                         InetAddress pingAddr = InetAddress.getByName(ipWifi);
-
                         // 50ms Timeout for the "ping"
                         if (pingAddr.isReachable(iFace, 200, 50)) {
-                            if (VERBOSE) Log.d(TAG, "found host: "+pingAddr.getHostAddress());
+                            if (VERBOSE) Log.d(TAG, "found possible host: "+pingAddr.getHostAddress());
                             // request MALOS Device Info for possible compatible host
-                            MalosTarget target = new MalosTarget(MalosTarget.DEVICEINFO, pingAddr.getHostAddress());
-                            new Thread(new ZeroMQRequest(target)).start();
+                            MalosDrive drive = new MalosDrive(MalosTarget.DEVICEINFO,pingAddr.getHostAddress());
+                            drive.request(onMatrixDetection);
                         }
                     }
                 }else{
                     if(DEBUG)Log.e(TAG,"Android not have connection!");
                 }
             } catch (UnknownHostException ex) {
+                if(DEBUG)Log.e(TAG,"UnknownHostException: "+ex.getMessage());
             } catch (IOException ex) {
+                if(DEBUG)Log.e(TAG,"IOException: "+ex.getMessage());
             }
 
             return null;
         }
     }
 
-    private class ZeroMQRequest implements Runnable {
-
-        private final MalosTarget target;
-
-        public ZeroMQRequest(MalosTarget target) {
-            this.target =target;
-        }
-
+    private MalosDrive.OnSubscriptionCallBack onMatrixDetection = new MalosDrive.OnSubscriptionCallBack() {
         @Override
-        public void run() {
-            ZMQ.Context sub_context = ZMQ.context(1);
-            ZMQ.Socket sub_socket = sub_context.socket(ZMQ.REQ);
-            sub_socket.connect(target.getBaseport());
-            sub_socket.setLinger(0);
-            sub_socket.send("".getBytes());
-            if(DEBUG)Log.d(TAG,"try get config from: "+ target.getBaseport());
-
-            while(!Thread.currentThread().isInterrupted()) {
-                try {
-                    if(sub_socket!=null){
-                        callback.onFoundedMatrixDevice(new MalosDevice(target.getHost(),sub_socket.recv()));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    sub_socket=null;
-                }
-            }
-            sub_socket.close();
-            sub_context.close();
+        public void onReceiveData(String host, byte[] data) {
+            callback.onFoundedMatrixDevice(new MalosDevice(host, data));
         }
-    }
+    };
 
     private String getWifiIpAddress(Context context) {
         WifiManager wifiManager = (WifiManager) context.getSystemService(WIFI_SERVICE);
@@ -136,7 +111,6 @@ public class Discovery {
             ipAddressString = null;
             callback.onDiscoveryError(ctx.getString(R.string.error_wifi_lan_ip));
         }
-
         return ipAddressString;
     }
 
