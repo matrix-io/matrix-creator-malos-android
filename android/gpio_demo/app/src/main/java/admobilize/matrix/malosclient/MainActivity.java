@@ -14,6 +14,7 @@ import admobilize.matrix.malosclient.malos.MalosTarget;
 import admobilize.matrix.malosclient.network.Discovery;
 import admobilize.matrix.malosclient.ui.InfoFragment;
 import admobilize.matrix.malosclient.utils.Storage;
+import matrix_malos.Driver;
 import matrix_malos.Driver.GpioParams.Builder;
 
 import static admobilize.matrix.malosclient.malos.MalosDrive.OnSubscriptionCallBack;
@@ -44,6 +45,7 @@ public class MainActivity extends BaseActivity {
     private MalosDrive humidity;
     private MalosDrive uv;
     private MalosDrive everloop;
+    private MalosDrive imu;
 
     private int red, green, blue;
 
@@ -104,18 +106,6 @@ public class MainActivity extends BaseActivity {
             // TODO: show snack or dialog
         }
     };
-
-
-    private void initDevices() {
-        gpio = new MalosDrive(MalosTarget.GPIO, deviceIp);
-        humidity = new MalosDrive(MalosTarget.HUMIDITY, deviceIp);
-        uv = new MalosDrive(MalosTarget.UV, deviceIp);
-        everloop = new MalosDrive(MalosTarget.EVERLOOP, deviceIp);
-
-        instanceUI();
-        outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
-
-    }
 
     private OnCheckedChangeListener onCheckedGpioToggleButton = new OnCheckedChangeListener() {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -198,6 +188,26 @@ public class MainActivity extends BaseActivity {
         }
     };
 
+    private OnSubscriptionCallBack onIMUDataCallBack = new OnSubscriptionCallBack() {
+        @Override
+        public void onReceiveData(String host, final byte[] data) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Driver.Imu imudata = imudata = Driver.Imu.parseFrom(data);
+                        if(VERBOSE)Log.d(TAG,"Yaw => "+imudata.getYaw());
+                        if(VERBOSE)Log.d(TAG,"Roll => "+imudata.getRoll());
+                        if(VERBOSE)Log.d(TAG,"Pitch => "+imudata.getPitch());
+                        joystickMoved((int)imudata.getPitch(),(int)imudata.getRoll());
+                    } catch (InvalidProtocolBufferException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
+
     public void configGpioOuputValue(int pin, int value){
         Builder gpioParams = GpioParams.newBuilder();
         gpioParams.setPin(pin);
@@ -237,6 +247,10 @@ public class MainActivity extends BaseActivity {
         uv.push("");
     }
 
+    public void requestIMUData(){
+        imu.push("");
+    }
+
     public void configHumiditySensor(){
         DriverConfig.Builder config = humidity.getBasicConfig();
         HumidityParams.Builder params = HumidityParams.newBuilder();
@@ -246,6 +260,17 @@ public class MainActivity extends BaseActivity {
         humidity.config(config);
     }
 
+    private void initDevices() {
+        gpio = new MalosDrive(MalosTarget.GPIO, deviceIp);
+        humidity = new MalosDrive(MalosTarget.HUMIDITY, deviceIp);
+        uv = new MalosDrive(MalosTarget.UV, deviceIp);
+        everloop = new MalosDrive(MalosTarget.EVERLOOP, deviceIp);
+        imu = new MalosDrive(MalosTarget.IMU, deviceIp);
+
+        instanceUI();
+        outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
+
+    }
 
     @Override
     void startDrivers() {
@@ -253,10 +278,12 @@ public class MainActivity extends BaseActivity {
         uv.start();
         gpio.start();
         everloop.start();
+        imu.start();
         //configHumiditySensor();
         uv.subscribe(onUVDataCallBack);
         gpio.subscribe(onGpioInputCallBack);
         humidity.subscribe(onHumidityDataCallBack);
+        imu.subscribe(onIMUDataCallBack);
         initTimers();
     }
 
@@ -266,15 +293,18 @@ public class MainActivity extends BaseActivity {
         gpio.unsubscribe();
         humidity.unsubscribe();
         uv.unsubscribe();
+        imu.unsubscribe();
         gpio.stop();
         humidity.stop();
         uv.stop();
         everloop.stop();
+        imu.stop();
     }
 
     @Override
     void fastUpdateDevices() {
         requestGpioInputValue(1);
+        requestIMUData();
     }
 
     @Override

@@ -19,6 +19,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import admobilize.matrix.malosclient.ui.ColorLEDController;
+import admobilize.matrix.malosclient.ui.JoystickView;
 
 /**
  * Created by Antonio Vanegas @hpsaturn on 11/12/16.
@@ -43,6 +44,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     public TextView temp_value;
     public TextView humi_value;
 
+    private JoystickView mJoystickView;
+
     private boolean isTargetConfig=false;
     public ProgressDialog loader;
 
@@ -62,6 +65,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         mOffImage = getResources().getDrawable(offImageId);
         mOnImage = getResources().getDrawable(onImageId);
 
+        mJoystickView = (JoystickView) findViewById(R.id.joystickView);
         ColorLEDController ledController = new ColorLEDController((MainActivity) this, 1, getResources(),true);
         ledController.attachToView((ViewGroup) findViewById(R.id.leds1));
 
@@ -91,7 +95,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             public void run() {
                 fastUpdateDevices();
             }
-        }, 0, 500);
+        }, 0, 250);
     }
 
     public void initTimers(){
@@ -158,6 +162,14 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
+
+	public void joystickButtonSwitchStateChanged(boolean buttonState) {
+		mJoystickView.setPressed(buttonState);
+	}
+
+    public void joystickMoved(int x, int y) {
+		mJoystickView.setPosition(x, y);
+	}
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
