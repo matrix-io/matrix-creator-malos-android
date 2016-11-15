@@ -101,6 +101,11 @@ public abstract class BaseActivity extends AppCompatActivity {
         fastTimer();
     }
 
+    public void stopTimers(){
+        mSlowTimer.cancel();
+        mFastTimer.cancel();
+    }
+
     abstract void fastUpdateDevices();
 
     abstract void slowUpdateDevices();
@@ -109,7 +114,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onResume() {
         if(isTargetConfig) {
             startDrivers();
-            initTimers();
         }
         super.onResume();
     }
@@ -117,8 +121,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         if(isTargetConfig) {
-            mSlowTimer.cancel();
-            mFastTimer.cancel();
             stopDrivers();
         }
         super.onStop();

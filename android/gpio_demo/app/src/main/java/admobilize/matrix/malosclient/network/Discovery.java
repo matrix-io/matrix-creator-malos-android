@@ -98,6 +98,7 @@ public class Discovery {
             ZMQ.Context sub_context = ZMQ.context(1);
             ZMQ.Socket sub_socket = sub_context.socket(ZMQ.REQ);
             sub_socket.connect(target.getBaseport());
+            sub_socket.setLinger(0);
             sub_socket.send("".getBytes());
             if(DEBUG)Log.d(TAG,"try get config from: "+ target.getBaseport());
 

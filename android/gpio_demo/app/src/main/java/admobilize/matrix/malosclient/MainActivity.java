@@ -71,6 +71,7 @@ public class MainActivity extends BaseActivity {
     public void startDiscovery() {
         if(DEBUG)Log.i(TAG,"startDiscovery..");
         showLoader(R.string.msg_find_device);
+        if(isTargetConfig())stopDrivers();
         deviceIp="";
         setTargetConfig(false);
         onConfigDevice=true;
@@ -93,7 +94,6 @@ public class MainActivity extends BaseActivity {
                     showLoader(R.string.msg_enable_sensors);
                     initDevices();
                     startDrivers();
-                    initTimers();
                 }
             });
 
@@ -257,12 +257,12 @@ public class MainActivity extends BaseActivity {
         uv.subscribe(onUVDataCallBack);
         gpio.subscribe(onGpioInputCallBack);
         humidity.subscribe(onHumidityDataCallBack);
+        initTimers();
     }
 
     @Override
     void stopDrivers() {
-        mSlowTimer.cancel();
-        mFastTimer.cancel();
+        stopTimers();
         gpio.unsubscribe();
         humidity.unsubscribe();
         uv.unsubscribe();

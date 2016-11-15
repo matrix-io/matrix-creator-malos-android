@@ -132,18 +132,6 @@ public class MalosDrive {
         }
     }
 
-    private class ZeroMQstop extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void...voids) {
-            if(DEBUG)Log.d(TAG,"stopping "+ target.getBaseport());
-            config_socket.close();
-            config_context.term();
-            config_socket=null;
-            config_context=null;
-            return null;
-        }
-    }
-
     private class ZeroMQUnsubscribe extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void...voids) {
@@ -168,6 +156,19 @@ public class MalosDrive {
             return null;
         }
     }
+
+    private class ZeroMQstop extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void...voids) {
+            if(DEBUG)Log.d(TAG,"stopping "+ target.getBaseport());
+            config_socket.close();
+            config_context.term();
+            config_socket=null;
+            config_context=null;
+            return null;
+        }
+    }
+
 
 
 }
