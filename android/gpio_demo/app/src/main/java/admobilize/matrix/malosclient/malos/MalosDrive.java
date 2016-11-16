@@ -122,19 +122,14 @@ public class MalosDrive {
                 try {
                     if(sub_socket!=null){
                         cb.onReceiveData(target.getHost(),sub_socket.recv());
-                        sub_socket.close();
-                        sub_socket=null;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    if(sub_socket!=null) {
-                        sub_socket.close();
-                        sub_socket = null;
-                    }
+                    sub_socket = null;
                 }
             }
-            if(sub_context!=null)sub_socket.close();
-            if(sub_context!=null)sub_context.term();
+            sub_socket.close();
+            sub_context.term();
         }
     }
 
@@ -191,7 +186,7 @@ public class MalosDrive {
                 push_socket.connect(target.getPushPort());
             }
             if(VERBOSE)Log.i(TAG,"push data..");
-            push_socket.send(data[0]);
+            if(push_context!=null&&push_socket!=null)push_socket.send(data[0]);
             return null;
         }
     }
@@ -204,6 +199,14 @@ public class MalosDrive {
             config_context.term();
             config_socket=null;
             config_context=null;
+            if(push_socket!=null){
+                push_socket.close();
+                push_socket=null;
+            }
+            if(push_context!=null){
+                push_context.term();
+                push_context=null;
+            }
             return null;
         }
     }
