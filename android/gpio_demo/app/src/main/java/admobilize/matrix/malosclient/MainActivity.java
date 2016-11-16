@@ -12,6 +12,7 @@ import admobilize.matrix.malosclient.malos.MalosDevice;
 import admobilize.matrix.malosclient.malos.MalosDrive;
 import admobilize.matrix.malosclient.malos.MalosTarget;
 import admobilize.matrix.malosclient.network.Discovery;
+import admobilize.matrix.malosclient.ui.IPTargetInputFragment;
 import admobilize.matrix.malosclient.ui.InfoFragment;
 import admobilize.matrix.malosclient.utils.Storage;
 import matrix_malos.Driver;
@@ -74,9 +75,7 @@ public class MainActivity extends BaseActivity {
         if(DEBUG)Log.i(TAG,"startDiscovery..");
         showLoader(R.string.msg_find_device);
         if(isTargetConfig())stopDrivers();
-        deviceIp="";
-        setTargetConfig(false);
-        onConfigDevice=true;
+        stopCurrentConfig();
         new Discovery(this, onDiscoveryMatrix).searchDevices();
     }
 
@@ -88,14 +87,7 @@ public class MainActivity extends BaseActivity {
                 public void run() {
                     dismissLoader();
                     if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
-                    String host=device.getIpAddress();
-                    EasyPreference.with(MainActivity.this).addObject(Storage.CURRENT_DEVICE,device).save();
-                    deviceIp=host;
-                    currentDevice=device;
-                    setTargetConfig(true);
-                    showLoader(R.string.msg_enable_sensors);
-                    initDevices();
-                    startDrivers();
+                    setNewIpTarget(device);
                 }
             });
 
@@ -106,6 +98,17 @@ public class MainActivity extends BaseActivity {
             // TODO: show snack or dialog
         }
     };
+
+    public void setNewIpTarget(MalosDevice device) {
+        String host=device.getIpAddress();
+        EasyPreference.with(MainActivity.this).addObject(Storage.CURRENT_DEVICE,device).save();
+        deviceIp=host;
+        currentDevice=device;
+        setTargetConfig(true);
+        showLoader(R.string.msg_enable_sensors);
+        initDevices();
+        startDrivers();
+    }
 
     private OnCheckedChangeListener onCheckedGpioToggleButton = new OnCheckedChangeListener() {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -261,15 +264,14 @@ public class MainActivity extends BaseActivity {
     }
 
     private void initDevices() {
+        if(DEBUG)Log.i(TAG,"initDevices..");
         gpio = new MalosDrive(MalosTarget.GPIO, deviceIp);
         humidity = new MalosDrive(MalosTarget.HUMIDITY, deviceIp);
         uv = new MalosDrive(MalosTarget.UV, deviceIp);
         everloop = new MalosDrive(MalosTarget.EVERLOOP, deviceIp);
         imu = new MalosDrive(MalosTarget.IMU, deviceIp);
-
         instanceUI();
         outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
-
     }
 
     @Override
@@ -288,7 +290,7 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    void stopDrivers() {
+    public void stopDrivers() {
         stopTimers();
         gpio.unsubscribe();
         humidity.unsubscribe();
@@ -299,6 +301,12 @@ public class MainActivity extends BaseActivity {
         uv.stop();
         everloop.stop();
         imu.stop();
+    }
+
+    public void stopCurrentConfig(){
+        deviceIp="";
+        setTargetConfig(false);
+        onConfigDevice=true;
     }
 
     @Override
@@ -321,5 +329,11 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    @Override
+    void showIPInputFragment() {
+        String ipAndroid = Discovery.getWifiIpAddress(this);
+        IPTargetInputFragment ipInputFragment = IPTargetInputFragment.newInstance(ipAndroid);
+        showDialog(ipInputFragment,IPTargetInputFragment.TAG);
+    }
 
 }

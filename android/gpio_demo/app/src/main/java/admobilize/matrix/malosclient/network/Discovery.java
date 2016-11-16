@@ -74,6 +74,7 @@ public class Discovery {
                     }
                 }else{
                     if(DEBUG)Log.e(TAG,"Android not have connection!");
+                    callback.onDiscoveryError(ctx.getString(R.string.error_wifi_lan_ip));
                 }
             } catch (UnknownHostException ex) {
                 if(DEBUG)Log.e(TAG,"UnknownHostException: "+ex.getMessage());
@@ -92,7 +93,7 @@ public class Discovery {
         }
     };
 
-    private String getWifiIpAddress(Context context) {
+    public static String getWifiIpAddress(Context context) {
         WifiManager wifiManager = (WifiManager) context.getSystemService(WIFI_SERVICE);
         int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
 
@@ -109,7 +110,6 @@ public class Discovery {
         } catch (UnknownHostException ex) {
             if(DEBUG)Log.e("WIFIIP", "Unable to get host address.");
             ipAddressString = null;
-            callback.onDiscoveryError(ctx.getString(R.string.error_wifi_lan_ip));
         }
         return ipAddressString;
     }

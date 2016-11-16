@@ -193,12 +193,17 @@ public abstract class BaseActivity extends AppCompatActivity {
             showDeviceInfo();
             return true;
         }
+        if (id == R.id.action_show_ip_input) {
+            showIPInputFragment();
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
 
     abstract void startDiscovery();
     abstract void showDeviceInfo();
+    abstract void showIPInputFragment();
 
     public void showFragment(Fragment fragment, String fragmentTag, boolean toStack) {
 
