@@ -22,7 +22,7 @@ android {
     sourceSets {
         main {
             proto {
-
+                srcDir '$projectDir/../../../protocol-buffers/malos/driver.proto'
             }
         }
     }
