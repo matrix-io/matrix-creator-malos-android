@@ -22,7 +22,7 @@ android {
     sourceSets {
         main {
             proto {
-                srcDir '$projectDir/../../../protocol-buffers/malos/driver.proto'
+
             }
         }
     }
@@ -60,3 +60,13 @@ protobuf {
     generatedFilesBaseDir = "$projectDir/build/generated"
 
 }
+
+task loadMalosProtos (type: Exec){
+    print "Loading protos definitions.."
+    mkdir('src/main/proto')
+    commandLine 'cp', '../../../protocol-buffers/malos/driver.proto', 'src/main/proto/'
+    println "done"
+}
+preBuild.dependsOn loadMalosProtos
+
+
