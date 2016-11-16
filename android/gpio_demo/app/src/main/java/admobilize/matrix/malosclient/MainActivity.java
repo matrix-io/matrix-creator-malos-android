@@ -216,14 +216,16 @@ public class MainActivity extends BaseActivity {
         gpioParams.setPin(pin);
         gpioParams.setModeValue(GpioParams.EnumMode.OUTPUT_VALUE);
         gpioParams.setValue(value);
-        gpio.config(DriverConfig.newBuilder().setGpio(gpioParams));
+//        gpio.config(DriverConfig.newBuilder().setGpio(gpioParams));
     }
 
     public void requestGpioInputValue(int pin){
+        DriverConfig.Builder config = gpio.getBasicConfig();
         Builder gpioParams = GpioParams.newBuilder();
         gpioParams.setPin(pin);
         gpioParams.setModeValue(GpioParams.EnumMode.INPUT_VALUE);
-        gpio.config(DriverConfig.newBuilder().setGpio(gpioParams));
+        config.setDelayBetweenUpdates(0.100f);
+        gpio.config(config.setGpio(gpioParams));
     }
 
     public void configEverLoop(int value, int color){
@@ -260,12 +262,13 @@ public class MainActivity extends BaseActivity {
         params.setCurrentTemperature(23.0f);
         params.setDoCalibration(true);
         config.setHumidity(params);
+        config.setDelayBetweenUpdates(0.500f);
         humidity.config(config);
     }
 
     private void initDevices() {
         if(DEBUG)Log.i(TAG,"initDevices..");
-        gpio = new MalosDrive(MalosTarget.GPIO, deviceIp);
+//        gpio = new MalosDrive(MalosTarget.GPIO, deviceIp);
         humidity = new MalosDrive(MalosTarget.HUMIDITY, deviceIp);
         uv = new MalosDrive(MalosTarget.UV, deviceIp);
         everloop = new MalosDrive(MalosTarget.EVERLOOP, deviceIp);
@@ -278,25 +281,25 @@ public class MainActivity extends BaseActivity {
     void startDrivers() {
         humidity.start();
         uv.start();
-        gpio.start();
+//        gpio.start();
         everloop.start();
         imu.start();
-        //configHumiditySensor();
+        configHumiditySensor();
         uv.subscribe(onUVDataCallBack);
-        gpio.subscribe(onGpioInputCallBack);
+//        gpio.subscribe(onGpioInputCallBack);
         humidity.subscribe(onHumidityDataCallBack);
         imu.subscribe(onIMUDataCallBack);
-        initTimers();
+        startPingTimer();
     }
 
     @Override
     public void stopDrivers() {
-        stopTimers();
-        gpio.unsubscribe();
+        stopPingTimer();
+//        gpio.unsubscribe();
         humidity.unsubscribe();
         uv.unsubscribe();
         imu.unsubscribe();
-        gpio.stop();
+//        gpio.stop();
         humidity.stop();
         uv.stop();
         everloop.stop();
@@ -310,15 +313,13 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    void fastUpdateDevices() {
-        requestGpioInputValue(1);
-        requestIMUData();
-    }
-
-    @Override
-    void slowUpdateDevices() {
+    void pingDevices() {
+        if(VERBOSE)Log.i(TAG,"pingDevices..");
         requestHumidityData();
         requestUVData();
+        requestIMUData();
+        requestIMUData();
+//        requestGpioInputValue(1);
     }
 
     @Override
