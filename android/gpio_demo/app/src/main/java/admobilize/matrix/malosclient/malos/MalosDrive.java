@@ -24,6 +24,7 @@ public class MalosDrive {
     private ZMQ.Socket sub_socket;
     private ZMQ.Context push_context;
     private ZMQ.Socket push_socket;
+    private ZMQ.Socket req_socket;
 
     public interface OnSubscriptionCallBack {
         void onReceiveData(String host, byte[] data);
@@ -153,25 +154,25 @@ public class MalosDrive {
 
         @Override
         public void run() {
-            ZMQ.Context sub_context = ZMQ.context(1);
-            ZMQ.Socket sub_socket = sub_context.socket(ZMQ.REQ);
-            sub_socket.connect(target.getBaseport());
-            sub_socket.setLinger(0);
-            sub_socket.send("".getBytes());
+            ZMQ.Context req_context = ZMQ.context(1);
+            req_socket = req_context.socket(ZMQ.REQ);
+            req_socket.connect(target.getBaseport());
+            req_socket.setLinger(0);
+            req_socket.send("".getBytes());
             if(DEBUG)Log.d(TAG,"try get config from: "+ target.getBaseport());
 
             while(!Thread.currentThread().isInterrupted()) {
                 try {
-                    if(sub_socket!=null){
-                        cb.onReceiveData(target.getHost(),sub_socket.recv());
+                    if(req_socket!=null){
+                        cb.onReceiveData(target.getHost(),req_socket.recv());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    sub_socket=null;
+                    req_socket=null;
                 }
             }
-            sub_socket.close();
-            sub_context.close();
+            req_socket.close();
+            req_context.term();
         }
     }
 
