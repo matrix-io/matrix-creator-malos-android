@@ -82,37 +82,24 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     abstract void stopDrivers();
 
-    public void slowTimer() {
+    private void pingTimer() {
         mSlowTimer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-                slowUpdateDevices();
+                pingDevices();
             }
-        }, 0, 7000);
+        }, 0, Config.TIME_INTO_PING);
     }
 
-    public void fastTimer() {
-        mFastTimer.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-                fastUpdateDevices();
-            }
-        }, 0, 250);
-    }
-
-    public void initTimers(){
+    public void startPingTimer(){
         mSlowTimer = new Timer();
-        mFastTimer = new Timer();
-        slowTimer();
-        fastTimer();
+        pingTimer();
     }
 
-    public void stopTimers(){
+    public void stopPingTimer(){
         mSlowTimer.cancel();
-        mFastTimer.cancel();
     }
 
-    abstract void fastUpdateDevices();
-
-    abstract void slowUpdateDevices();
+    abstract void pingDevices();
 
     @Override
     protected void onResume() {
