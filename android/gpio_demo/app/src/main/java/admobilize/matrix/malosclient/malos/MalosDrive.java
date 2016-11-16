@@ -120,14 +120,21 @@ public class MalosDrive {
 
             while(!Thread.currentThread().isInterrupted()) {
                 try {
-                    if(sub_socket!=null)cb.onReceiveData(target.getHost(),sub_socket.recv());
+                    if(sub_socket!=null){
+                        cb.onReceiveData(target.getHost(),sub_socket.recv());
+                        sub_socket.close();
+                        sub_socket=null;
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    sub_socket=null;
+                    if(sub_socket!=null) {
+                        sub_socket.close();
+                        sub_socket = null;
+                    }
                 }
             }
-            sub_socket.close();
-            sub_context.close();
+            if(sub_context!=null)sub_socket.close();
+            if(sub_context!=null)sub_context.term();
         }
     }
 
