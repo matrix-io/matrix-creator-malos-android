@@ -1,1 +1,0 @@
-- Errors are strings. We should use a protocol buffer for errors.

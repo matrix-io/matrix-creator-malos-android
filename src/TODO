@@ -1,6 +1,0 @@
-- Grep for kUnsecureBindScope. We will accept connections from any network.
-  This might not be what we want.
-  
-- Return error messages as protos instead of strings.
-
-- We need the MUTEX. What is happening? Removing for now.
