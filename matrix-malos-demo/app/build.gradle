@@ -64,7 +64,7 @@ protobuf {
 task loadMalosProtos (type: Exec){
     print "Loading protos definitions.."
     mkdir('src/main/proto')
-    commandLine 'cp', '../../../protocol-buffers/malos/driver.proto', 'src/main/proto/'
+    commandLine 'cp', '../../protocol-buffers/malos/driver.proto', 'src/main/proto/'
     println "done"
 }
 preBuild.dependsOn loadMalosProtos
