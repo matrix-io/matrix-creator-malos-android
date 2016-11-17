@@ -1,6 +1,7 @@
 package admobilize.matrix.malosclient;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.CompoundButton;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -49,6 +50,7 @@ public class MainActivity extends BaseActivity {
     private MalosDrive imu;
 
     private int red, green, blue;
+    private Handler handler = new Handler();
 
 
     @Override
@@ -67,15 +69,12 @@ public class MainActivity extends BaseActivity {
             setTargetConfig(true);
             initDevices();
         }
-
     }
 
     @Override
     public void startDiscovery() {
         if(DEBUG)Log.i(TAG,"startDiscovery..");
         showLoader(R.string.msg_find_device);
-        if(isTargetConfig())stopDrivers();
-        stopCurrentConfig();
         new Discovery(this, onDiscoveryMatrix).searchDevices();
     }
 
@@ -85,29 +84,36 @@ public class MainActivity extends BaseActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    dismissLoader();
                     if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
                     setNewIpTarget(device);
                 }
             });
-
         }
-
         @Override
         public void onDiscoveryError(String msgError) {
             // TODO: show snack or dialog
+            if(DEBUG)Log.e(TAG,"onDiscoveryError: "+msgError);
         }
     };
 
-    public void setNewIpTarget(MalosDevice device) {
-        String host=device.getIpAddress();
-        EasyPreference.with(MainActivity.this).addObject(Storage.CURRENT_DEVICE,device).save();
-        deviceIp=host;
-        currentDevice=device;
-        setTargetConfig(true);
-        showLoader(R.string.msg_enable_sensors);
-        initDevices();
-        startDrivers();
+    public void setNewIpTarget(final MalosDevice device) {
+        if(isTargetConfig())stopDrivers();
+        stopCurrentConfig();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                dismissLoader();
+                if (DEBUG) Log.i(TAG, "Matrix device detected!");
+                String host=device.getIpAddress();
+                EasyPreference.with(MainActivity.this).addObject(Storage.CURRENT_DEVICE,device).save();
+                deviceIp=host;
+                currentDevice=device;
+                setTargetConfig(true);
+                showLoader(R.string.msg_enable_sensors);
+                initDevices();
+                startDrivers();
+            }
+        }, 3000);
     }
 
     private OnCheckedChangeListener onCheckedGpioToggleButton = new OnCheckedChangeListener() {
@@ -286,6 +292,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     void startDrivers() {
+        if(DEBUG)Log.i(TAG,"startDrivers..");
         humidity.start();
         uv.start();
 //        gpio.start();
@@ -304,6 +311,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public void stopDrivers() {
+        if(DEBUG)Log.i(TAG,"stopDrivers..");
         stopPingTimer();
 //        gpio.unsubscribe();
         humidity.unsubscribe();

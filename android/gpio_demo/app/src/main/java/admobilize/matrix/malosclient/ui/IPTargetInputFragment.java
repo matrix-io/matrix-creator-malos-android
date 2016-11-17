@@ -1,7 +1,6 @@
 package admobilize.matrix.malosclient.ui;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,7 +26,7 @@ public class IPTargetInputFragment extends DialogFragment {
     private static final boolean DEBUG = Config.DEBUG;
     public static final String TAG = IPTargetInputFragment.class.getSimpleName();
     private EditText inputIp;
-    final Handler handler = new Handler();
+    private MalosDrive drive;
 
     public static IPTargetInputFragment newInstance(String ipAndroid) {
         IPTargetInputFragment fragment = new IPTargetInputFragment();
@@ -69,7 +68,7 @@ public class IPTargetInputFragment extends DialogFragment {
             if (ip.length() > 0) {
                 if (DEBUG) Log.i(TAG, "finding device..");
                 getMain().showLoader(R.string.msg_find_device);
-                MalosDrive drive = new MalosDrive(MalosTarget.DEVICEINFO, ip);
+                drive = new MalosDrive(MalosTarget.DEVICEINFO, ip);
                 drive.request(onMatrixDetection);
             }
         }
@@ -78,18 +77,10 @@ public class IPTargetInputFragment extends DialogFragment {
     private MalosDrive.OnSubscriptionCallBack onMatrixDetection = new MalosDrive.OnSubscriptionCallBack() {
         @Override
         public void onReceiveData(final String host, final byte[] data) {
-            final MalosDevice matrixDevice = new MalosDevice(host, data);
-            if(getMain().isTargetConfig())getMain().stopDrivers();
-            getMain().stopCurrentConfig();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    getMain().dismissLoader();
-                    if (DEBUG) Log.i(TAG, "Matrix device detected!");
-                    getMain().setNewIpTarget(matrixDevice);
-                    dismiss();
-                }
-            }, 3000);
+            MalosDevice matrixDevice = new MalosDevice(host, data);
+            drive.unsubscribe();
+            getMain().setNewIpTarget(matrixDevice);
+            dismiss();
         }
     };
 

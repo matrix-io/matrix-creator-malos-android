@@ -39,19 +39,30 @@ public class Discovery {
     private Context ctx;
     private List<MalosDrive> driverRegister = new ArrayList<>();
     final Handler handler = new Handler();
+    private boolean founded;
+
+    public interface OnDiscoveryMatrixDevice{
+        void onFoundedMatrixDevice(MalosDevice device);
+        void onDiscoveryError(String msgError);
+    }
 
     public Discovery(Context ctx, OnDiscoveryMatrixDevice cb) {
         this.ctx = ctx;
         this.callback=cb;
     }
 
+    private MalosDrive.OnSubscriptionCallBack onMatrixDetection = new MalosDrive.OnSubscriptionCallBack() {
+        @Override
+        public void onReceiveData(String host, byte[] data) {
+            if(!founded){
+                founded=true;
+                callback.onFoundedMatrixDevice(new MalosDevice(host, data));
+            }
+        }
+    };
+
     public void searchDevices(){
         new FindDevices().execute();
-    }
-
-    public interface OnDiscoveryMatrixDevice{
-        void onFoundedMatrixDevice(MalosDevice device);
-        void onDiscoveryError(String msgError);
     }
 
     private class FindDevices extends AsyncTask<Void,Void,Void>{
@@ -96,17 +107,10 @@ public class Discovery {
             } catch (IOException ex) {
                 if(DEBUG)Log.e(TAG,"IOException: "+ex.getMessage());
             }
-
             return null;
         }
-    }
 
-    private MalosDrive.OnSubscriptionCallBack onMatrixDetection = new MalosDrive.OnSubscriptionCallBack() {
-        @Override
-        public void onReceiveData(String host, byte[] data) {
-            callback.onFoundedMatrixDevice(new MalosDevice(host, data));
-        }
-    };
+    }
 
     public static String getWifiIpAddress(Context context) {
         WifiManager wifiManager = (WifiManager) context.getSystemService(WIFI_SERVICE);
@@ -116,9 +120,7 @@ public class Discovery {
         if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
             ipAddress = Integer.reverseBytes(ipAddress);
         }
-
         byte[] ipByteArray = BigInteger.valueOf(ipAddress).toByteArray();
-
         String ipAddressString;
         try {
             ipAddressString = InetAddress.getByAddress(ipByteArray).getHostAddress();
