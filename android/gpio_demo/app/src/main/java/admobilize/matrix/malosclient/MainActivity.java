@@ -266,6 +266,13 @@ public class MainActivity extends BaseActivity {
         humidity.config(config);
     }
 
+    public void configIMUSensor(){
+        DriverConfig.Builder config = imu.getBasicConfig();
+        config.setTimeoutAfterLastPing(7.0f);
+        config.setDelayBetweenUpdates(0.100f);
+        imu.config(config);
+    }
+
     private void initDevices() {
         if(DEBUG)Log.i(TAG,"initDevices..");
 //        gpio = new MalosDrive(MalosTarget.GPIO, deviceIp);
@@ -284,7 +291,10 @@ public class MainActivity extends BaseActivity {
 //        gpio.start();
         everloop.start();
         imu.start();
+
         configHumiditySensor();
+        configIMUSensor();
+
         uv.subscribe(onUVDataCallBack);
 //        gpio.subscribe(onGpioInputCallBack);
         humidity.subscribe(onHumidityDataCallBack);
