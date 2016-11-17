@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_marginRight="30dip"
+    android:layout_weight="1"
+    android:orientation="vertical"
+    android:paddingRight="20dip">
+
+    <TextView
+        style="@style/DemoKitLEDText"
+        android:layout_height="20dip"
+        android:layout_gravity="center"
+        android:clickable="true"
+        android:text="@string/ledLabel" />
+
+    <admobilize.matrix.malosclient.ui.VerticalSlider
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"></admobilize.matrix.malosclient.ui.VerticalSlider>
+
+    <TextView
+        style="@style/DemoKitLEDText"
+        android:layout_height="20dip"
+        android:layout_gravity="center"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="155" />
+</LinearLayout>
+

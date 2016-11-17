@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="DemoKitTextWhite">#FFF</color>
+	<color name="DemoKitLabelGray">#666</color>
+
+
+    <!-- GENERIC COLORS -->
+    <color name="red">#f00</color>
+    <color name="blue">#0080ff</color>
+    <color name="green">#f0f0</color>
+    <color name="yellow">#ffffff00</color>
+    <color name="grey">#ffE7ECEF</color>
+    <color name="black">#ff000000</color>
+    <color name="white">#ffffffff</color>
+    <color name="orange">#ffa500</color>
+    <color name="brown">#584949</color>
+    <color name="purple">#950ad7</color>
+    <color name="cyan">#00b1ff</color>
+
+</resources>
