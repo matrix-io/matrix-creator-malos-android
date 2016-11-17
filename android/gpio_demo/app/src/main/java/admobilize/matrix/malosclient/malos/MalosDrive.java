@@ -134,16 +134,6 @@ public class MalosDrive {
         }
     }
 
-    private class ZeroMQUnsubscribe extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void...voids) {
-            if(DEBUG)Log.d(TAG,"unsubscribe "+ target.getSubPort());
-            if(sub_socket!=null)sub_socket.close();
-            sub_socket=null;
-            return null;
-        }
-    }
-
     private class ZeroMQRequest implements Runnable {
 
         private final OnSubscriptionCallBack cb;
@@ -156,8 +146,9 @@ public class MalosDrive {
         public void run() {
             ZMQ.Context req_context = ZMQ.context(1);
             req_socket = req_context.socket(ZMQ.REQ);
-            req_socket.connect(target.getBaseport());
             req_socket.setLinger(0);
+            req_socket.setSendTimeOut(0);
+            req_socket.connect(target.getBaseport());
             req_socket.send("".getBytes());
             if(DEBUG)Log.d(TAG,"try get config from: "+ target.getBaseport());
 
@@ -188,6 +179,18 @@ public class MalosDrive {
             }
             if(VERBOSE)Log.i(TAG,"push data..");
             if(push_context!=null&&push_socket!=null)push_socket.send(data[0]);
+            return null;
+        }
+    }
+
+    private class ZeroMQUnsubscribe extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void...voids) {
+            if(DEBUG)Log.d(TAG,"unsubscribe "+ target.getSubPort());
+            if(sub_socket!=null)sub_socket.close();
+            sub_socket=null;
+            if(req_socket!=null)req_socket.close();
+            req_socket=null;
             return null;
         }
     }

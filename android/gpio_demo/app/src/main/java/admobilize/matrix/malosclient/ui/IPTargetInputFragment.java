@@ -27,7 +27,6 @@ public class IPTargetInputFragment extends DialogFragment {
     private static final boolean DEBUG = Config.DEBUG;
     public static final String TAG = IPTargetInputFragment.class.getSimpleName();
     private EditText inputIp;
-    private MalosDrive drive;
     final Handler handler = new Handler();
 
     public static IPTargetInputFragment newInstance(String ipAndroid) {
@@ -70,7 +69,7 @@ public class IPTargetInputFragment extends DialogFragment {
             if (ip.length() > 0) {
                 if (DEBUG) Log.i(TAG, "finding device..");
                 getMain().showLoader(R.string.msg_find_device);
-                drive = new MalosDrive(MalosTarget.DEVICEINFO, ip);
+                MalosDrive drive = new MalosDrive(MalosTarget.DEVICEINFO, ip);
                 drive.request(onMatrixDetection);
             }
         }

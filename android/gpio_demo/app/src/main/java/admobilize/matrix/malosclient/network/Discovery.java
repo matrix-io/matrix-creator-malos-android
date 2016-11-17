@@ -3,6 +3,7 @@ package admobilize.matrix.malosclient.network;
 import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.util.Log;
 
 import java.io.IOException;
@@ -11,6 +12,9 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import admobilize.matrix.malosclient.Config;
 import admobilize.matrix.malosclient.R;
@@ -33,6 +37,8 @@ public class Discovery {
     private final OnDiscoveryMatrixDevice callback;
 
     private Context ctx;
+    private List<MalosDrive> driverRegister = new ArrayList<>();
+    final Handler handler = new Handler();
 
     public Discovery(Context ctx, OnDiscoveryMatrixDevice cb) {
         this.ctx = ctx;
@@ -70,8 +76,17 @@ public class Discovery {
                             // request MALOS Device Info for possible compatible host
                             MalosDrive drive = new MalosDrive(MalosTarget.DEVICEINFO,pingAddr.getHostAddress());
                             drive.request(onMatrixDetection);
+                            driverRegister.add(drive);
                         }
                     }
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (DEBUG) Log.i(TAG, "stopping all detection threads..");
+                            Iterator<MalosDrive> it = driverRegister.iterator();
+                            while(it.hasNext())it.next().unsubscribe();
+                        }
+                    }, 3000);
                 }else{
                     if(DEBUG)Log.e(TAG,"Android not have connection!");
                     callback.onDiscoveryError(ctx.getString(R.string.error_wifi_lan_ip));
