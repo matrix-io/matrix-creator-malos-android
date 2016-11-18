@@ -1,5 +1,7 @@
-# matrix-creator-malos-android
+# Matrix Creator Android MALOS Demo
 Android application that interfaces with MATRIX Creator MALOS layer.
+![alt text](https://github.com/matrix-io/matrix-creator-malos-android/blob/master/screenshot.jpg "Matrix Malos Demo Screenshot")
+
 
 ## Prerequisities 
 create file matrix-malos-demo/app/fabric.properties with:
