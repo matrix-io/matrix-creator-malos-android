@@ -1,5 +1,5 @@
 # Matrix Creator Android MALOS Demo
-Android application that interfaces with MATRIX Creator MALOS layer. <a href="url"><img src="https://github.com/matrix-io/matrix-creator-malos-android/blob/master/screenshot.jpg" align="right" height="426" width="240" ></a>
+Android application that interfaces with MATRIX Creator MALOS layer. <a href="https://github.com/matrix-io/matrix-creator-malos-android/blob/master/screenshot.jpg"><img src="https://github.com/matrix-io/matrix-creator-malos-android/blob/master/screenshot.jpg" align="right" height="426" width="240" ></a>
 
 ## Current Features
 
