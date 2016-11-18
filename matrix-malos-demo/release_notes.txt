@@ -1,3 +1,8 @@
+
+20161118
+- Fix some ZeroMQ thread crash
+
+
 20161118
 - First signed release
 - Source code: https://github.com/matrix-io/matrix-creator-malos-android
