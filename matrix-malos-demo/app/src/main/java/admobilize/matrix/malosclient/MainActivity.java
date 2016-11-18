@@ -225,7 +225,7 @@ public class MainActivity extends BaseActivity {
         gpioParams.setPin(pin);
         gpioParams.setModeValue(GpioParams.EnumMode.OUTPUT_VALUE);
         gpioParams.setValue(value);
-//        gpio.config(DriverConfig.newBuilder().setGpio(gpioParams));
+        gpio.config(DriverConfig.newBuilder().setGpio(gpioParams));
     }
 
     public void requestGpioInputValue(int pin){
@@ -284,7 +284,7 @@ public class MainActivity extends BaseActivity {
 
     private void initDevices() {
         if(DEBUG)Log.i(TAG,"initDevices..");
-//        gpio = new MalosDrive(MalosTarget.GPIO, deviceIp);
+        gpio = new MalosDrive(MalosTarget.GPIO, deviceIp);
         humidity = new MalosDrive(MalosTarget.HUMIDITY, deviceIp);
         uv = new MalosDrive(MalosTarget.UV, deviceIp);
         everloop = new MalosDrive(MalosTarget.EVERLOOP, deviceIp);
@@ -298,7 +298,7 @@ public class MainActivity extends BaseActivity {
         if(DEBUG)Log.i(TAG,"startDrivers..");
         humidity.start();
         uv.start();
-//        gpio.start();
+        gpio.start();
         everloop.start();
         imu.start();
 
@@ -306,7 +306,7 @@ public class MainActivity extends BaseActivity {
         configIMUSensor();
 
         uv.subscribe(onUVDataCallBack);
-//        gpio.subscribe(onGpioInputCallBack);
+        gpio.subscribe(onGpioInputCallBack);
         humidity.subscribe(onHumidityDataCallBack);
         imu.subscribe(onIMUDataCallBack);
         startPingTimer();
@@ -316,11 +316,11 @@ public class MainActivity extends BaseActivity {
     public void stopDrivers() {
         if(DEBUG)Log.i(TAG,"stopDrivers..");
         stopPingTimer();
-//        gpio.unsubscribe();
+        gpio.unsubscribe();
         humidity.unsubscribe();
         uv.unsubscribe();
         imu.unsubscribe();
-//        gpio.stop();
+        gpio.stop();
         humidity.stop();
         uv.stop();
         everloop.stop();
@@ -340,7 +340,7 @@ public class MainActivity extends BaseActivity {
         requestUVData();
         requestIMUData();
         requestIMUData();
-//        requestGpioInputValue(1);
+        requestGpioInputValue(1);
     }
 
     @Override
