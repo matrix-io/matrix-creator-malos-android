@@ -66,10 +66,15 @@ public class MalosDrive {
 
         @Override
         protected Void doInBackground(Void...voids) {
-            config_context = ZMQ.context(1);
-            config_socket = config_context.socket(ZMQ.PUSH);
-            config_socket.connect(target.getBaseport());
-            if(DEBUG)Log.d(TAG,"connected with: "+ target.getBaseport());
+            try {
+                config_context = ZMQ.context(1);
+                config_socket = config_context.socket(ZMQ.PUSH);
+                config_socket.connect(target.getBaseport());
+                if(DEBUG)Log.d(TAG,"connected with: "+ target.getBaseport());
+            } catch (Exception e) {
+                if(DEBUG)Log.e(TAG,"ZeroMQConnect crash: "+e.getMessage());
+                e.printStackTrace();
+            }
             return null;
         }
 
@@ -97,6 +102,7 @@ public class MalosDrive {
                     config_socket.send(config.build().toByteArray());
                 }
             } catch (Exception e) {
+                if(DEBUG)Log.e(TAG,"ZeroMQConfig crash: "+e.getMessage());
                 e.printStackTrace();
             }
             return null;
@@ -113,24 +119,29 @@ public class MalosDrive {
 
         @Override
         public void run() {
-            ZMQ.Context sub_context = ZMQ.context(1);
-            sub_socket = sub_context.socket(ZMQ.SUB);
-            sub_socket.connect(target.getSubPort());
-            sub_socket.subscribe("".getBytes());
-            if(DEBUG)Log.i(TAG,"subscribe with: "+ target.getSubPort());
+            try {
+                ZMQ.Context sub_context = ZMQ.context(1);
+                sub_socket = sub_context.socket(ZMQ.SUB);
+                sub_socket.connect(target.getSubPort());
+                sub_socket.subscribe("".getBytes());
+                if(DEBUG)Log.i(TAG,"subscribe with: "+ target.getSubPort());
 
-            while(!Thread.currentThread().isInterrupted()) {
-                try {
-                    if(sub_socket!=null){
-                        cb.onReceiveData(target.getHost(),sub_socket.recv());
+                while(!Thread.currentThread().isInterrupted()) {
+                    try {
+                        if(sub_socket!=null){
+                            cb.onReceiveData(target.getHost(),sub_socket.recv());
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        sub_socket = null;
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    sub_socket = null;
                 }
+                sub_socket.close();
+                sub_context.term();
+            } catch (Exception e) {
+                if(DEBUG)Log.e(TAG,"ZeroMQSubscription crash: "+e.getMessage());
+                e.printStackTrace();
             }
-            sub_socket.close();
-            sub_context.term();
         }
     }
 
@@ -144,26 +155,31 @@ public class MalosDrive {
 
         @Override
         public void run() {
-            ZMQ.Context req_context = ZMQ.context(1);
-            req_socket = req_context.socket(ZMQ.REQ);
-            req_socket.setLinger(0);
-            req_socket.setSendTimeOut(0);
-            req_socket.connect(target.getBaseport());
-            req_socket.send("".getBytes());
-            if(DEBUG)Log.d(TAG,"try get config from: "+ target.getBaseport());
+            try {
+                ZMQ.Context req_context = ZMQ.context(1);
+                req_socket = req_context.socket(ZMQ.REQ);
+                req_socket.setLinger(0);
+                req_socket.setSendTimeOut(0);
+                req_socket.connect(target.getBaseport());
+                req_socket.send("".getBytes());
+                if(DEBUG)Log.d(TAG,"try get config from: "+ target.getBaseport());
 
-            while(!Thread.currentThread().isInterrupted()) {
-                try {
-                    if(req_socket!=null){
-                        cb.onReceiveData(target.getHost(),req_socket.recv());
+                while(!Thread.currentThread().isInterrupted()) {
+                    try {
+                        if(req_socket!=null){
+                            cb.onReceiveData(target.getHost(),req_socket.recv());
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        req_socket=null;
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    req_socket=null;
                 }
+                req_socket.close();
+                req_context.term();
+            } catch (Exception e) {
+                if(DEBUG)Log.e(TAG,"ZeroMQRequest crash: "+e.getMessage());
+                e.printStackTrace();
             }
-            req_socket.close();
-            req_context.term();
         }
     }
 
@@ -171,14 +187,19 @@ public class MalosDrive {
     private class ZeroMQPush extends AsyncTask<String, Void, Void> {
         @Override
         protected Void doInBackground(String...data) {
-            if(push_context==null||push_socket==null) {
-                if(VERBOSE)Log.i(TAG,"creating push connection..");
-                push_context = ZMQ.context(1);
-                push_socket = push_context.socket(ZMQ.PUSH);
-                push_socket.connect(target.getPushPort());
+            try {
+                if(push_context==null||push_socket==null) {
+                    if(VERBOSE)Log.i(TAG,"creating push connection..");
+                    push_context = ZMQ.context(1);
+                    push_socket = push_context.socket(ZMQ.PUSH);
+                    push_socket.connect(target.getPushPort());
+                }
+                if(VERBOSE)Log.i(TAG,"push data..");
+                if(push_context!=null&&push_socket!=null)push_socket.send(data[0]);
+            } catch (Exception e) {
+                if(DEBUG)Log.e(TAG,"ZeroMQPush crash: "+e.getMessage());
+                e.printStackTrace();
             }
-            if(VERBOSE)Log.i(TAG,"push data..");
-            if(push_context!=null&&push_socket!=null)push_socket.send(data[0]);
             return null;
         }
     }
@@ -186,11 +207,16 @@ public class MalosDrive {
     private class ZeroMQUnsubscribe extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void...voids) {
-            if(DEBUG)Log.d(TAG,"unsubscribe "+ target.getSubPort());
-            if(sub_socket!=null)sub_socket.close();
-            sub_socket=null;
-            if(req_socket!=null)req_socket.close();
-            req_socket=null;
+            try {
+                if(DEBUG)Log.d(TAG,"unsubscribe "+ target.getSubPort());
+                if(sub_socket!=null)sub_socket.close();
+                sub_socket=null;
+                if(req_socket!=null)req_socket.close();
+                req_socket=null;
+            } catch (Exception e) {
+                if(DEBUG)Log.e(TAG,"ZeroMQUnsubscribe crash: "+e.getMessage());
+                e.printStackTrace();
+            }
             return null;
         }
     }
@@ -198,18 +224,23 @@ public class MalosDrive {
     private class ZeroMQstop extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void...voids) {
-            if(DEBUG)Log.d(TAG,"stopping "+ target.getBaseport());
-            config_socket.close();
-            config_context.term();
-            config_socket=null;
-            config_context=null;
-            if(push_socket!=null){
-                push_socket.close();
-                push_socket=null;
-            }
-            if(push_context!=null){
-                push_context.term();
-                push_context=null;
+            try {
+                if(DEBUG)Log.d(TAG,"stopping "+ target.getBaseport());
+                config_socket.close();
+                config_context.term();
+                config_socket=null;
+                config_context=null;
+                if(push_socket!=null){
+                    push_socket.close();
+                    push_socket=null;
+                }
+                if(push_context!=null){
+                    push_context.term();
+                    push_context=null;
+                }
+            } catch (Exception e) {
+                if(DEBUG)Log.e(TAG,"ZeroMQstop crash: "+e.getMessage());
+                e.printStackTrace();
             }
             return null;
         }
