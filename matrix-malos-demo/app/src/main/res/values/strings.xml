@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Matrix Malos Demo</string>
+
+    <string name="input">In</string>
+	<string name="output">Out</string>
+	<string name="no_device">Please connect a DemoKit board.</string>
+	<string name="servo1Label">Servo<sub>1</sub></string>
+	<string name="ledLabel">LED<sub>1</sub></string>
+	<string name="relay1Label">Relay<sub>1</sub></string>
+	<string name="relay2Label">Relay<sub>2</sub></string>
+	<string name="off">Off</string>
+	<string name="on">On</string>
+	<string name="send_to">Share with</string>
+	<string name="msg_find_device">Searching Matrix Creator device…</string>
+	<string name="msg_loading">Loading…</string>
+	<string name="error_wifi_lan_ip">Not WiFi or Lan connection</string>
+	<string name="action_scan_devices">Scan Devices…</string>
+	<string name="msg_enable_sensors">Enabling sensors…</string>
+	<string name="action_get_device_info">Device Info…</string>
+	<string name="ipinput_title">Enter manual target</string>
+	<string name="ipinput_hint">IP of Matrix target</string>
+	<string name="ipinput_button_confirm">SAVE</string>
+	<string name="action_input_manual_ip">Manual Target</string>
+
+</resources>
