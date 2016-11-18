@@ -1,0 +1,5 @@
+20161118
+- First signed release
+- Source code: https://github.com/matrix-io/matrix-creator-malos-android
+
+

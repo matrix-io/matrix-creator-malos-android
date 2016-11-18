@@ -16,6 +16,11 @@ repositories {
 
 apply plugin: 'com.google.protobuf'
 
+if(project.hasProperty("matrix_malos.signing") && new File(project.property("matrix_malos.signing") + ".gradle").exists()) {
+    apply from: project.property("matrix_malos.signing") + ".gradle";
+}
+
+
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.3"
@@ -23,7 +28,7 @@ android {
         applicationId "admobilize.matrix.malosclient"
         minSdkVersion 15
         targetSdkVersion 24
-        versionCode 1
+        versionCode 333
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -31,6 +36,20 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    productFlavors {
+        // Define separate dev and prod product flavors.
+        dev {
+            // dev utilizes minSDKVersion = 21 to allow the Android gradle plugin
+            // to pre-dex each module and produce an APK that can be tested on
+            // Android Lollipop without time consuming dex merging processes.
+            minSdkVersion 23
+        }
+        prod {
+            minSdkVersion 15
+            ext.betaDistributionEmailsFilePath="distribution_emails.txt"
+            ext.betaDistributionReleaseNotesFilePath="release_notes.txt"
         }
     }
 
