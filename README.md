@@ -19,8 +19,15 @@ Android application that interfaces with MATRIX Creator MALOS layer. <a href="ht
 - [ ] LIRC custom control config
 - [ ] RaspberryPi Wifi config via BT4
 
+## Preriquisities
+* Install lastest deb package of [MALOS](https://github.com/matrix-io/matrix-creator-quickstart/wiki/2.-Getting-Started)
+* Your creator on the same network
+* Android 4.x or later
 
-## Preriquisities and dependencies
+## Download
+Pre-release for testing: [rev336](https://github.com/matrix-io/matrix-creator-malos-android/releases)
+
+## Preriquisities and dependencies for Build
 ```
 git clone --recursive https://github.com/matrix-io/matrix-creator-malos-android.git
 cd matrix-creator-malos-android
