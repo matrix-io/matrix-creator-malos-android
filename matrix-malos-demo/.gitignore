@@ -54,4 +54,9 @@ build/
 
 #NDK
 obj/
+
+#Fabric
 app/fabric.properties
+
+#Protos
+app/src/main/proto
