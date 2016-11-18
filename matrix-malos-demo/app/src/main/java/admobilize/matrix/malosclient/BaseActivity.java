@@ -48,6 +48,11 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private boolean isTargetConfig=false;
 
+
+    /******************************************************
+     * TIMER METHODS FOR DRIVER SENSORS PINGS
+     ******************************************************/
+
     private void pingTimer() {
         mSlowTimer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
@@ -66,6 +71,10 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
     abstract void pingDevices();
 
+    /********************************************************
+     * CONNECT AND DISCONNECT DRIVER ON EXIT AND RESUME APP
+     ********************************************************/
+
     @Override
     protected void onResume() {
         if(isTargetConfig) {
@@ -82,6 +91,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onStop();
     }
 
+    /**********************************************************
+     * MAIN ACTIVITIES METHODS
+     **********************************************************/
+
     public boolean isTargetConfig() {
         return isTargetConfig;
     }
@@ -89,7 +102,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     public void setTargetConfig(boolean targetConfig) {
         isTargetConfig = targetConfig;
     }
-
 
     abstract void startDrivers();
     abstract void stopDrivers();
