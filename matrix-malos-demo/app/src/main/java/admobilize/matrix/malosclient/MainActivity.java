@@ -74,29 +74,9 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-
-
     /******************************************************************
      * MALOS SENSORS CALLBACKS
      ******************************************************************/
-
-    private Discovery.OnDiscoveryMatrixDevice onDiscoveryMatrix = new Discovery.OnDiscoveryMatrixDevice() {
-        @Override
-        public void onFoundedMatrixDevice(final MalosDevice device) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
-                    setNewIpTarget(device);
-                }
-            });
-        }
-        @Override
-        public void onDiscoveryError(String msgError) {
-            // TODO: show snack or dialog
-            if(DEBUG)Log.e(TAG,"onDiscoveryError: "+msgError);
-        }
-    };
 
     private OnCheckedChangeListener onCheckedGpioToggleButton = new OnCheckedChangeListener() {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -112,7 +92,6 @@ public class MainActivity extends BaseActivity {
         }
     };
 
-
     private OnSubscriptionCallBack onGpioInputCallBack = new OnSubscriptionCallBack() {
         @Override
         public void onReceiveData(String host, final byte[] data) {
@@ -121,9 +100,14 @@ public class MainActivity extends BaseActivity {
                 public void run() {
                     try {
                         GpioParams gpioParams = GpioParams.parseFrom(data);
-                        if(VERBOSE)Log.d(TAG,"onGpioInputCallBack receive value: "+gpioParams.getValue());
-                        if(gpioParams.getValue()==0)inputButton.setImageDrawable(mOffImage);
+                        if(VERBOSE)Log.d(TAG,"Gpio PINs vector: "+Integer.toBinaryString(gpioParams.getVector()));
+                        // Validate vector (binary: 2=pin 1)
+                        // input button:
+                        if(gpioParams.getVector()==2)inputButton.setImageDrawable(mOffImage);
                         else inputButton.setImageDrawable(mOnImage);
+                        // output button state (for refresh multiple devices):
+                        if(gpioParams.getVector()==1)outputButton.setChecked(true);
+                        else if (gpioParams.getVector()==0)outputButton.setChecked(false);
                     } catch (InvalidProtocolBufferException e) {
                         e.printStackTrace();
                     }
@@ -212,7 +196,7 @@ public class MainActivity extends BaseActivity {
         gpio.config(DriverConfig.newBuilder().setGpio(gpioParams));
     }
 
-    public void requestGpioInputValue(int pin){
+    public void configGpioInputValue(int pin){
         DriverConfig.Builder config = gpio.getBasicConfig();
         Builder gpioParams = GpioParams.newBuilder();
         gpioParams.setPin(pin);
@@ -270,6 +254,10 @@ public class MainActivity extends BaseActivity {
         imu.push("");
     }
 
+    public void requestGpioData(){
+        gpio.push("");
+    }
+
     @Override
     void pingDevices() {
         if(VERBOSE)Log.i(TAG,"pingDevices..");
@@ -277,13 +265,31 @@ public class MainActivity extends BaseActivity {
         requestUVData();
         requestIMUData();
         requestIMUData();
-        requestGpioInputValue(1);
+        requestGpioData();
     }
 
 
     /***********************************************************
      * DISCOVERY METHODS
      ***********************************************************/
+
+    private Discovery.OnDiscoveryMatrixDevice onDiscoveryMatrix = new Discovery.OnDiscoveryMatrixDevice() {
+        @Override
+        public void onFoundedMatrixDevice(final MalosDevice device) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
+                    setNewIpTarget(device);
+                }
+            });
+        }
+        @Override
+        public void onDiscoveryError(String msgError) {
+            // TODO: show snack or dialog
+            if(DEBUG)Log.e(TAG,"onDiscoveryError: "+msgError);
+        }
+    };
 
     @Override
     public void startDiscovery() {
@@ -334,6 +340,7 @@ public class MainActivity extends BaseActivity {
 
         configHumiditySensor();
         configIMUSensor();
+        configGpioInputValue(1);
 
         uv.subscribe(onUVDataCallBack);
         gpio.subscribe(onGpioInputCallBack);
