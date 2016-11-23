@@ -53,6 +53,7 @@ public class MainActivity extends BaseActivity {
 
     private int red, green, blue;
     private Handler handler = new Handler();
+    private MalosDrive deviceInfo;
 
 
     @Override
@@ -67,10 +68,8 @@ public class MainActivity extends BaseActivity {
             startDiscovery();
         }
         else {
-            deviceIp=matrix.getIpAddress();
-            currentDevice=matrix;
-            setTargetConfig(true);
-            initDevices();
+            deviceInfo = new MalosDrive(MalosTarget.DEVICEINFO, matrix.getIpAddress());
+            deviceInfo.request(onMatrixDetection);
         }
     }
 
@@ -319,6 +318,23 @@ public class MainActivity extends BaseActivity {
             }
         }, 3000);
     }
+
+    private MalosDrive.OnSubscriptionCallBack onMatrixDetection = new MalosDrive.OnSubscriptionCallBack() {
+        @Override
+        public void onReceiveData(final String host, final byte[] data) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    MalosDevice matrixDevice = new MalosDevice(host, data);
+                    deviceInfo.stop();
+                    deviceIp=matrixDevice.getIpAddress();
+                    currentDevice=matrixDevice;
+                    setTargetConfig(true);
+                    initDevices();
+                }
+            });
+        }
+    };
 
     private void initDevices() {
         if(DEBUG)Log.i(TAG,"initDevices..");
