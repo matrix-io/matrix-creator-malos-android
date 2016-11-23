@@ -95,7 +95,7 @@ public class Discovery {
                         public void run() {
                             if (DEBUG) Log.i(TAG, "stopping all detection threads..");
                             Iterator<MalosDrive> it = driverRegister.iterator();
-                            while(it.hasNext())it.next().unsubscribe();
+                            while(it.hasNext())it.next().stop();
                         }
                     }, 3000);
                 }else{

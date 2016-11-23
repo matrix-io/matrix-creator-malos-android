@@ -334,11 +334,6 @@ public class MainActivity extends BaseActivity {
     @Override
     void startDrivers() {
         if(DEBUG)Log.i(TAG,"startDrivers..");
-        humidity.start();
-        uv.start();
-        gpio.start();
-        everloop.start();
-        imu.start();
 
         configHumiditySensor();
         configIMUSensor();
@@ -355,10 +350,6 @@ public class MainActivity extends BaseActivity {
     public void stopDrivers() {
         if(DEBUG)Log.i(TAG,"stopDrivers..");
         stopPingTimer();
-        gpio.unsubscribe();
-        humidity.unsubscribe();
-        uv.unsubscribe();
-        imu.unsubscribe();
         gpio.stop();
         humidity.stop();
         uv.stop();
