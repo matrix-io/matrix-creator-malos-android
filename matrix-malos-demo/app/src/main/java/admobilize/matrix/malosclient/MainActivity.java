@@ -100,14 +100,16 @@ public class MainActivity extends BaseActivity {
                 public void run() {
                     try {
                         GpioParams gpioParams = GpioParams.parseFrom(data);
-                        if(VERBOSE)Log.d(TAG,"Gpio PINs vector: "+Integer.toBinaryString(gpioParams.getVector()));
-                        // Validate vector (binary: 2=pin 1)
-                        // input button:
-                        if(gpioParams.getVector()==2)inputButton.setImageDrawable(mOffImage);
-                        else inputButton.setImageDrawable(mOnImage);
+                        if(VERBOSE)Log.d(TAG,"Gpio PINs vector: "+Integer.toBinaryString(gpioParams.getValues()));
+                        int gpio_data = gpioParams.getValues();
+                        int pin_output_mask = 0x1 << Config.GPIO_DEMO_OUTPUT;
+                        int pin_input_mask  = 0x1 << Config.GPIO_DEMO_INPUT;
+
+                        if(((gpio_data & pin_input_mask) >> Config.GPIO_DEMO_INPUT)==1)inputButton.setImageDrawable(mOnImage);
+                        else inputButton.setImageDrawable(mOffImage);
                         // output button state (for refresh multiple devices):
-                        if(gpioParams.getVector()==1)outputButton.setChecked(true);
-                        else if (gpioParams.getVector()==0)outputButton.setChecked(false);
+                        if(((gpio_data & pin_output_mask) >> Config.GPIO_DEMO_OUTPUT)==1)outputButton.setChecked(true);
+                        else outputButton.setChecked(false);
                     } catch (InvalidProtocolBufferException e) {
                         e.printStackTrace();
                     }
