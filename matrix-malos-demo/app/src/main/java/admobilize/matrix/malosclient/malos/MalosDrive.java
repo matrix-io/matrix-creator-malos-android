@@ -204,10 +204,14 @@ public class MalosDrive {
                     push_context=null;
                 }
                 if(DEBUG)Log.d(TAG,"unsubscribe "+ target.getSubPort());
-                if(sub_socket!=null)sub_socket.close();
-                sub_socket=null;
-                if(req_socket!=null)req_socket.close();
-                req_socket=null;
+                if(sub_socket!=null){
+                    sub_socket.close();
+                    sub_socket=null;
+                }
+                if(req_socket!=null){
+                    req_socket.close();
+                    req_socket=null;
+                }
             } catch (Exception e) {
                 if(DEBUG)Log.e(TAG,"ZeroMQstop crash: "+e.getMessage());
                 e.printStackTrace();

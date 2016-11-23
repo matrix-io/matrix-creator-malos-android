@@ -72,23 +72,16 @@ public abstract class BaseActivity extends AppCompatActivity {
     abstract void pingDevices();
 
     /********************************************************
-     * CONNECT AND DISCONNECT DRIVER ON EXIT AND RESUME APP
+     * DISCONNECT DRIVER ON EXIT APP
      ********************************************************/
 
     @Override
-    protected void onResume() {
+    protected void onDestroy() {
         if(isTargetConfig) {
-            startDrivers();
-        }
-        super.onResume();
-    }
-
-    @Override
-    protected void onStop() {
-        if(isTargetConfig) {
+            if(DEBUG)Log.d(TAG,"onDestroy stopping drivers..");
             stopDrivers();
         }
-        super.onStop();
+        super.onDestroy();
     }
 
     /**********************************************************

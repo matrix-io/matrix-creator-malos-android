@@ -327,6 +327,7 @@ public class MainActivity extends BaseActivity {
         uv = new MalosDrive(MalosTarget.UV, deviceIp);
         everloop = new MalosDrive(MalosTarget.EVERLOOP, deviceIp);
         imu = new MalosDrive(MalosTarget.IMU, deviceIp);
+        startDrivers();
         instanceUI();
         outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
     }
