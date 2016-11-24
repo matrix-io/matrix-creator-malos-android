@@ -29,7 +29,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 24
         versionCode 351
-        versionName "1.0"
+        versionName "1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
