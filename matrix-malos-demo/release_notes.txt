@@ -1,3 +1,13 @@
+20161123
+- Fix Matrix connectio before start hardware driver connection
+- Best stop/resume app flow
+- fix some crash bugs
+- Add first version of GPIO updates callback (need Malos master version)
+
+20161118
+- Fix some ZeroMQ thread crash
+
+
 20161118
 - First signed release
 - Source code: https://github.com/matrix-io/matrix-creator-malos-android

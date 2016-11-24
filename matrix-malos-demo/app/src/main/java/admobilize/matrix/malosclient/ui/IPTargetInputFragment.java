@@ -78,7 +78,7 @@ public class IPTargetInputFragment extends DialogFragment {
         @Override
         public void onReceiveData(final String host, final byte[] data) {
             MalosDevice matrixDevice = new MalosDevice(host, data);
-            drive.unsubscribe();
+            drive.stop();
             getMain().setNewIpTarget(matrixDevice);
             dismiss();
         }

@@ -53,6 +53,7 @@ public class MainActivity extends BaseActivity {
 
     private int red, green, blue;
     private Handler handler = new Handler();
+    private MalosDrive deviceInfo;
 
 
     @Override
@@ -67,57 +68,14 @@ public class MainActivity extends BaseActivity {
             startDiscovery();
         }
         else {
-            deviceIp=matrix.getIpAddress();
-            currentDevice=matrix;
-            setTargetConfig(true);
-            initDevices();
+            deviceInfo = new MalosDrive(MalosTarget.DEVICEINFO, matrix.getIpAddress());
+            deviceInfo.request(onMatrixDetection);
         }
     }
 
-    @Override
-    public void startDiscovery() {
-        if(DEBUG)Log.i(TAG,"startDiscovery..");
-        showLoader(R.string.msg_find_device);
-        new Discovery(this, onDiscoveryMatrix).searchDevices();
-    }
-
-    private Discovery.OnDiscoveryMatrixDevice onDiscoveryMatrix = new Discovery.OnDiscoveryMatrixDevice() {
-        @Override
-        public void onFoundedMatrixDevice(final MalosDevice device) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
-                    setNewIpTarget(device);
-                }
-            });
-        }
-        @Override
-        public void onDiscoveryError(String msgError) {
-            // TODO: show snack or dialog
-            if(DEBUG)Log.e(TAG,"onDiscoveryError: "+msgError);
-        }
-    };
-
-    public void setNewIpTarget(final MalosDevice device) {
-        if(isTargetConfig())stopDrivers();
-        stopCurrentConfig();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                dismissLoader();
-                if (DEBUG) Log.i(TAG, "Matrix device detected!");
-                String host=device.getIpAddress();
-                EasyPreference.with(MainActivity.this).addObject(Storage.CURRENT_DEVICE,device).save();
-                deviceIp=host;
-                currentDevice=device;
-                setTargetConfig(true);
-                showLoader(R.string.msg_enable_sensors);
-                initDevices();
-                startDrivers();
-            }
-        }, 3000);
-    }
+    /******************************************************************
+     * MALOS SENSORS CALLBACKS
+     ******************************************************************/
 
     private OnCheckedChangeListener onCheckedGpioToggleButton = new OnCheckedChangeListener() {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -133,7 +91,6 @@ public class MainActivity extends BaseActivity {
         }
     };
 
-
     private OnSubscriptionCallBack onGpioInputCallBack = new OnSubscriptionCallBack() {
         @Override
         public void onReceiveData(String host, final byte[] data) {
@@ -142,9 +99,16 @@ public class MainActivity extends BaseActivity {
                 public void run() {
                     try {
                         GpioParams gpioParams = GpioParams.parseFrom(data);
-                        if(VERBOSE)Log.d(TAG,"onGpioInputCallBack receive value: "+gpioParams.getValue());
-                        if(gpioParams.getValue()==0)inputButton.setImageDrawable(mOffImage);
-                        else inputButton.setImageDrawable(mOnImage);
+                        if(VERBOSE)Log.d(TAG,"Gpio PINs vector: "+Integer.toBinaryString(gpioParams.getValues()));
+                        int gpio_data = gpioParams.getValues();
+                        int pin_output_mask = 0x1 << Config.GPIO_DEMO_OUTPUT;
+                        int pin_input_mask  = 0x1 << Config.GPIO_DEMO_INPUT;
+
+                        if(((gpio_data & pin_input_mask) >> Config.GPIO_DEMO_INPUT)==1)inputButton.setImageDrawable(mOnImage);
+                        else inputButton.setImageDrawable(mOffImage);
+                        // output button state (for refresh multiple devices):
+                        if(((gpio_data & pin_output_mask) >> Config.GPIO_DEMO_OUTPUT)==1)outputButton.setChecked(true);
+                        else outputButton.setChecked(false);
                     } catch (InvalidProtocolBufferException e) {
                         e.printStackTrace();
                     }
@@ -220,15 +184,20 @@ public class MainActivity extends BaseActivity {
         }
     };
 
+
+    /******************************************************************
+     * CONFIG MALOS SENSORS
+     ******************************************************************/
+
     public void configGpioOuputValue(int pin, int value){
         Builder gpioParams = GpioParams.newBuilder();
         gpioParams.setPin(pin);
         gpioParams.setModeValue(GpioParams.EnumMode.OUTPUT_VALUE);
         gpioParams.setValue(value);
-//        gpio.config(DriverConfig.newBuilder().setGpio(gpioParams));
+        gpio.config(DriverConfig.newBuilder().setGpio(gpioParams));
     }
 
-    public void requestGpioInputValue(int pin){
+    public void configGpioInputValue(int pin){
         DriverConfig.Builder config = gpio.getBasicConfig();
         Builder gpioParams = GpioParams.newBuilder();
         gpioParams.setPin(pin);
@@ -253,18 +222,6 @@ public class MainActivity extends BaseActivity {
         everloop.config(DriverConfig.newBuilder().setImage(image));
     }
 
-    public void requestHumidityData(){
-        humidity.push("");
-    }
-
-    public void requestUVData(){
-        uv.push("");
-    }
-
-    public void requestIMUData(){
-        imu.push("");
-    }
-
     public void configHumiditySensor(){
         DriverConfig.Builder config = humidity.getBasicConfig();
         HumidityParams.Builder params = HumidityParams.newBuilder();
@@ -282,55 +239,24 @@ public class MainActivity extends BaseActivity {
         imu.config(config);
     }
 
-    private void initDevices() {
-        if(DEBUG)Log.i(TAG,"initDevices..");
-//        gpio = new MalosDrive(MalosTarget.GPIO, deviceIp);
-        humidity = new MalosDrive(MalosTarget.HUMIDITY, deviceIp);
-        uv = new MalosDrive(MalosTarget.UV, deviceIp);
-        everloop = new MalosDrive(MalosTarget.EVERLOOP, deviceIp);
-        imu = new MalosDrive(MalosTarget.IMU, deviceIp);
-        instanceUI();
-        outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
+    /***********************************************************
+     * PING TO SENSORS
+     ***********************************************************/
+
+    public void requestHumidityData(){
+        humidity.push("");
     }
 
-    @Override
-    void startDrivers() {
-        if(DEBUG)Log.i(TAG,"startDrivers..");
-        humidity.start();
-        uv.start();
-//        gpio.start();
-        everloop.start();
-        imu.start();
-
-        configHumiditySensor();
-        configIMUSensor();
-
-        uv.subscribe(onUVDataCallBack);
-//        gpio.subscribe(onGpioInputCallBack);
-        humidity.subscribe(onHumidityDataCallBack);
-        imu.subscribe(onIMUDataCallBack);
-        startPingTimer();
+    public void requestUVData(){
+        uv.push("");
     }
 
-    @Override
-    public void stopDrivers() {
-        if(DEBUG)Log.i(TAG,"stopDrivers..");
-        stopPingTimer();
-//        gpio.unsubscribe();
-        humidity.unsubscribe();
-        uv.unsubscribe();
-        imu.unsubscribe();
-//        gpio.stop();
-        humidity.stop();
-        uv.stop();
-        everloop.stop();
-        imu.stop();
+    public void requestIMUData(){
+        imu.push("");
     }
 
-    public void stopCurrentConfig(){
-        deviceIp="";
-        setTargetConfig(false);
-        onConfigDevice=true;
+    public void requestGpioData(){
+        gpio.push("");
     }
 
     @Override
@@ -340,8 +266,125 @@ public class MainActivity extends BaseActivity {
         requestUVData();
         requestIMUData();
         requestIMUData();
-//        requestGpioInputValue(1);
+        requestGpioData();
     }
+
+
+    /***********************************************************
+     * DISCOVERY METHODS
+     ***********************************************************/
+
+    private Discovery.OnDiscoveryMatrixDevice onDiscoveryMatrix = new Discovery.OnDiscoveryMatrixDevice() {
+        @Override
+        public void onFoundedMatrixDevice(final MalosDevice device) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(DEBUG)Log.i(TAG,"[ Matrix Creator Device Found!]");
+                    setNewIpTarget(device);
+                }
+            });
+        }
+        @Override
+        public void onDiscoveryError(String msgError) {
+            // TODO: show snack or dialog
+            if(DEBUG)Log.e(TAG,"onDiscoveryError: "+msgError);
+        }
+    };
+
+    @Override
+    public void startDiscovery() {
+        if(DEBUG)Log.i(TAG,"startDiscovery..");
+        showLoader(R.string.msg_find_device);
+        new Discovery(this, onDiscoveryMatrix).searchDevices();
+    }
+
+    public void setNewIpTarget(final MalosDevice device) {
+        if(isTargetConfig())stopDrivers();
+        disableCurrentConfig();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                dismissLoader();
+                if (DEBUG) Log.i(TAG, "Matrix device detected!");
+                String host=device.getIpAddress();
+                EasyPreference.with(MainActivity.this).addObject(Storage.CURRENT_DEVICE,device).save();
+                deviceIp=host;
+                currentDevice=device;
+                setTargetConfig(true);
+                showLoader(R.string.msg_enable_sensors);
+                initDevices();
+                startDrivers();
+            }
+        }, 3000);
+    }
+
+    private MalosDrive.OnSubscriptionCallBack onMatrixDetection = new MalosDrive.OnSubscriptionCallBack() {
+        @Override
+        public void onReceiveData(final String host, final byte[] data) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    MalosDevice matrixDevice = new MalosDevice(host, data);
+                    deviceInfo.stop();
+                    deviceIp=matrixDevice.getIpAddress();
+                    currentDevice=matrixDevice;
+                    setTargetConfig(true);
+                    initDevices();
+                }
+            });
+        }
+    };
+
+    private void initDevices() {
+        if(DEBUG)Log.i(TAG,"initDevices..");
+        gpio = new MalosDrive(MalosTarget.GPIO, deviceIp);
+        humidity = new MalosDrive(MalosTarget.HUMIDITY, deviceIp);
+        uv = new MalosDrive(MalosTarget.UV, deviceIp);
+        everloop = new MalosDrive(MalosTarget.EVERLOOP, deviceIp);
+        imu = new MalosDrive(MalosTarget.IMU, deviceIp);
+        startDrivers();
+        instanceUI();
+        outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
+    }
+
+    @Override
+    void startDrivers() {
+        if(DEBUG)Log.i(TAG,"startDrivers..");
+
+        configHumiditySensor();
+        configIMUSensor();
+        configGpioInputValue(1);
+
+        uv.subscribe(onUVDataCallBack);
+        gpio.subscribe(onGpioInputCallBack);
+        humidity.subscribe(onHumidityDataCallBack);
+        imu.subscribe(onIMUDataCallBack);
+        startPingTimer();
+    }
+
+    @Override
+    public void stopDrivers() {
+        if(DEBUG)Log.i(TAG,"stopDrivers..");
+        stopPingTimer();
+        gpio.stop();
+        humidity.stop();
+        uv.stop();
+        everloop.stop();
+        imu.stop();
+    }
+
+    public void disableCurrentConfig(){
+        deviceIp="";
+        setTargetConfig(false);
+        onConfigDevice=true;
+    }
+
+
+
+    /***********************************************************
+     * FRAGMENTS METHODS
+     ***********************************************************/
 
     @Override
     void showDeviceInfo() {

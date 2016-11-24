@@ -43,11 +43,68 @@ public abstract class BaseActivity extends AppCompatActivity {
     public TextView uv_risk;
     public TextView temp_value;
     public TextView humi_value;
-
     private JoystickView mJoystickView;
+    private ProgressDialog loader;
 
     private boolean isTargetConfig=false;
-    public ProgressDialog loader;
+
+
+    /******************************************************
+     * TIMER METHODS FOR DRIVER SENSORS PINGS
+     ******************************************************/
+
+    private void pingTimer() {
+        mSlowTimer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                pingDevices();
+            }
+        }, 0, Config.TIME_INTO_PING);
+    }
+
+    public void startPingTimer(){
+        mSlowTimer = new Timer();
+        pingTimer();
+    }
+
+    public void stopPingTimer(){
+        mSlowTimer.cancel();
+    }
+    abstract void pingDevices();
+
+    /********************************************************
+     * DISCONNECT DRIVER ON EXIT APP
+     ********************************************************/
+
+    @Override
+    protected void onDestroy() {
+        if(isTargetConfig) {
+            if(DEBUG)Log.d(TAG,"onDestroy stopping drivers..");
+            stopDrivers();
+        }
+        super.onDestroy();
+    }
+
+    /**********************************************************
+     * MAIN ACTIVITIES METHODS
+     **********************************************************/
+
+    public boolean isTargetConfig() {
+        return isTargetConfig;
+    }
+
+    public void setTargetConfig(boolean targetConfig) {
+        isTargetConfig = targetConfig;
+    }
+
+    abstract void startDrivers();
+    abstract void stopDrivers();
+    abstract void startDiscovery();
+    abstract void showDeviceInfo();
+    abstract void showIPInputFragment();
+
+    /*******************************************************************************
+     *                        U I   M E T H O D S
+     * *****************************************************************************/
 
     public void instanceUI (){
         outputButton = (ToggleButton) findViewById(R.id.tb_main_ouput);
@@ -78,53 +135,47 @@ public abstract class BaseActivity extends AppCompatActivity {
         loader.setMessage(getString(R.string.msg_loading));
     }
 
-    abstract void startDrivers();
+    public void joystickButtonSwitchStateChanged(boolean buttonState) {
+		mJoystickView.setPressed(buttonState);
+	}
 
-    abstract void stopDrivers();
-
-    private void pingTimer() {
-        mSlowTimer.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-                pingDevices();
-            }
-        }, 0, Config.TIME_INTO_PING);
-    }
-
-    public void startPingTimer(){
-        mSlowTimer = new Timer();
-        pingTimer();
-    }
-
-    public void stopPingTimer(){
-        mSlowTimer.cancel();
-    }
-
-    abstract void pingDevices();
+    public void joystickMoved(int x, int y) {
+		mJoystickView.setPosition(x, y);
+	}
 
     @Override
-    protected void onResume() {
-        if(isTargetConfig) {
-            startDrivers();
-        }
-        super.onResume();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
     }
 
     @Override
-    protected void onStop() {
-        if(isTargetConfig) {
-            stopDrivers();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_scan_devices) {
+            startDiscovery();
+            return true;
         }
-        super.onStop();
+        if (id == R.id.action_get_device_info) {
+            showDeviceInfo();
+            return true;
+        }
+        if (id == R.id.action_show_ip_input) {
+            showIPInputFragment();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
-    public boolean isTargetConfig() {
-        return isTargetConfig;
+    public void showSnackLong(String msg) {
+        Snackbar.make(this.getCurrentFocus(), msg, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
 
-    public void setTargetConfig(boolean targetConfig) {
-        isTargetConfig = targetConfig;
+    public void showSnackLong(int msg) {
+        Snackbar.make(this.getCurrentFocus(), msg, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
-
 
     public void showLoader(int msg) {
         if (loader != null) {
@@ -149,48 +200,14 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-
-	public void joystickButtonSwitchStateChanged(boolean buttonState) {
-		mJoystickView.setPressed(buttonState);
-	}
-
-    public void joystickMoved(int x, int y) {
-		mJoystickView.setPosition(x, y);
-	}
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        if (id == R.id.action_scan_devices) {
-            startDiscovery();
-            return true;
-        }
-        if (id == R.id.action_get_device_info) {
-            showDeviceInfo();
-            return true;
-        }
-        if (id == R.id.action_show_ip_input) {
-            showIPInputFragment();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    abstract void startDiscovery();
-    abstract void showDeviceInfo();
-    abstract void showIPInputFragment();
+    /*******************************************************************************
+     *                        F R A G M E N T   T O O L S
+     * *****************************************************************************
+     *
+     * @param fragment fragment to replace on container
+     * @param fragmentTag TAG of fragment for post searching
+     * @param toStack enable/disable put on popbackstack
+     */
 
     public void showFragment(Fragment fragment, String fragmentTag, boolean toStack) {
 
@@ -285,16 +302,5 @@ public abstract class BaseActivity extends AppCompatActivity {
             return false;
         }
     }
-
-    public void showSnackLong(String msg) {
-        Snackbar.make(this.getCurrentFocus(), msg, Snackbar.LENGTH_LONG).setAction("Action", null).show();
-    }
-
-    public void showSnackLong(int msg) {
-        Snackbar.make(this.getCurrentFocus(), msg, Snackbar.LENGTH_LONG).setAction("Action", null).show();
-    }
-
-
-
 
 }
