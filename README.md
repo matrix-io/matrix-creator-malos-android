@@ -9,6 +9,7 @@ Android application that interfaces with MATRIX Creator MALOS layer. <a href="ht
 * UV index radation
 * IMU (x,y) widget visualitation
 * GPIO input/output configuration (pin 0,1)
+* GPIO updates callbacks
 * Auto discovery Matrix Creator on LAN network
 * Manual IP Matrix device target
 
@@ -25,7 +26,7 @@ Android application that interfaces with MATRIX Creator MALOS layer. <a href="ht
 * Android 4.x or later
 
 ## Download
-Pre-release for testing: [rev336](https://github.com/matrix-io/matrix-creator-malos-android/releases)
+Pre-release for testing: [rev351](https://github.com/matrix-io/matrix-creator-malos-android/releases)(Devel branch)
 
 ## Preriquisities and dependencies for Build
 ```
