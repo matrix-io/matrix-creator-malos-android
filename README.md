@@ -14,14 +14,23 @@ Android application that interfaces with MATRIX Creator MALOS layer. <a href="ht
 * Manual IP Matrix device target
 
 ## TODO
+- [X] GPIO callback
 - [ ] Pressure
+- [ ] Mic Array visualization (beamforming localization)
 - [ ] ZigbeeBulb basic control
-- [ ] Mic Array visualization
 - [ ] LIRC custom control config
 - [ ] RaspberryPi Wifi config via BT4
 
 ## Preriquisities
-* Install lastest deb package of [MALOS](https://github.com/matrix-io/matrix-creator-quickstart/wiki/2.-Getting-Started)
+* Only install lastest MALOS deb package on your RaspberryPi:
+```
+echo "deb http://packages.matrix.one/matrix-creator/ ./" | sudo tee --append /etc/apt/sources.list
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install -y libzmq3-dev xc3sprog malos-eye matrix-creator-malos matrix-creator-openocd wiringpi matrix-creator-init cmake g++ git --force-yes
+```
+For more info: [MALOS](https://github.com/matrix-io/matrix-creator-quickstart/wiki/2.-Getting-Started)
+
 * Your creator on the same network
 * Android 4.x or later
 
@@ -29,10 +38,14 @@ Android application that interfaces with MATRIX Creator MALOS layer. <a href="ht
 Pre-release for testing: [rev351](https://github.com/matrix-io/matrix-creator-malos-android/releases)(Devel branch)
 
 ## Preriquisities and dependencies for Build
+
+#### Clone repository and submodules
 ```
 git clone --recursive https://github.com/matrix-io/matrix-creator-malos-android.git
 cd matrix-creator-malos-android
 ```
+
+#### Fabric configuration
 create file matrix-malos-demo/app/fabric.properties with:
 ```
 apiSecret=<YOUR FABRIC SECRET>
@@ -40,9 +53,10 @@ apiKey=<YOUR FABRIC API KEY>
 ```
 (or open your project on android studio and config crashlytics fabric plugin.
 
-### Building and install
+#### Building and install
 ```
 ./gradlew assembleDebug
 ./gradlew installDebug
 ```
+(or with AndroidStudio IDE)
 
