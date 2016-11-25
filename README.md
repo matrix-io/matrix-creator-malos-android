@@ -13,6 +13,9 @@ Android application that interfaces with MATRIX Creator MALOS layer. <a href="ht
 * Auto discovery Matrix Creator on LAN network
 * Manual IP Matrix device target
 
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=ihV_v7zFO7A" target="_blank"><img src="http://img.youtube.com/vi/ihV_v7zFO7A/0.jpg" 
+alt="Matrix Creator Android-MALOS demo" width="234" height="180" border="5" /></a>
+
 ## TODO
 - [X] GPIO callback
 - [ ] Pressure
