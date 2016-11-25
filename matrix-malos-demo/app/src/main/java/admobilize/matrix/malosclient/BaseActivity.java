@@ -20,6 +20,7 @@ import java.util.TimerTask;
 
 import admobilize.matrix.malosclient.ui.ColorLEDController;
 import admobilize.matrix.malosclient.ui.JoystickView;
+import admobilize.matrix.malosclient.utils.Tools;
 
 /**
  * Created by Antonio Vanegas @hpsaturn on 11/12/16.
@@ -146,6 +147,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        menu.add(Menu.NONE, menu.size(), Menu.NONE,
+                "Version "+Tools.getVersionName(this)+
+                " rev"+Tools.getVersionCode(this));
         return true;
     }
 
