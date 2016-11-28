@@ -1,6 +1,7 @@
 package admobilize.matrix.malosclient.ui;
 
 import android.os.Bundle;
+import android.os.HandlerThread;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -78,7 +79,12 @@ public class IPTargetInputFragment extends DialogFragment {
         @Override
         public void onReceiveData(final String host, final byte[] data) {
             MalosDevice matrixDevice = new MalosDevice(host, data);
-            drive.stop();
+            getMain().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    drive.stop();
+                }
+            });
             getMain().setNewIpTarget(matrixDevice);
             dismiss();
         }
