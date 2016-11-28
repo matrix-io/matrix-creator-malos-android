@@ -185,7 +185,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (loader != null) {
             try {
                 if(msg>0)loader.setMessage(getString(msg));
-                loader.show();
+                if(!loader.isShowing())loader.show();
             } catch (Exception e) {
                 if (DEBUG) Log.d(TAG, "LOADER Exception:");
                 if (DEBUG) e.printStackTrace();
