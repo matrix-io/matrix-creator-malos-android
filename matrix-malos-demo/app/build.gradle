@@ -28,7 +28,7 @@ android {
         applicationId "admobilize.matrix.malosclient"
         minSdkVersion 15
         targetSdkVersion 24
-        versionCode 359
+        versionCode 364
         versionName "1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
