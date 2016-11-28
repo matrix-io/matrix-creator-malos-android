@@ -45,16 +45,16 @@ public class MainActivity extends BaseActivity {
     private String deviceIp;
     private boolean onConfigDevice;
 
+    private MalosDrive deviceInfo;
     private MalosDrive gpio;
     private MalosDrive humidity;
     private MalosDrive uv;
     private MalosDrive everloop;
     private MalosDrive imu;
+    private MalosDrive servo;
 
     private int red, green, blue;
     private Handler handler = new Handler();
-    private MalosDrive deviceInfo;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -220,6 +220,9 @@ public class MainActivity extends BaseActivity {
             image.addLed(ledValue);
         }
         everloop.config(DriverConfig.newBuilder().setImage(image));
+        value=(value*180/255);
+        if(VERBOSE)Log.d(TAG,"servo value="+value);
+        configServoDriver(2,value);
     }
 
     public void configHumiditySensor(){
@@ -237,6 +240,15 @@ public class MainActivity extends BaseActivity {
         config.setTimeoutAfterLastPing(7.0f);
         config.setDelayBetweenUpdates(0.100f);
         imu.config(config);
+    }
+
+    public void configServoDriver(int pin, int angle){
+        DriverConfig.Builder config = DriverConfig.newBuilder();
+        Driver.ServoParams.Builder servoParams = Driver.ServoParams.newBuilder();
+        servoParams.setAngle(angle);
+        servoParams.setAngle(pin);
+        config.setServo(servoParams);
+        servo.config(config);
     }
 
     /***********************************************************
@@ -343,6 +355,7 @@ public class MainActivity extends BaseActivity {
         uv = new MalosDrive(MalosTarget.UV, deviceIp);
         everloop = new MalosDrive(MalosTarget.EVERLOOP, deviceIp);
         imu = new MalosDrive(MalosTarget.IMU, deviceIp);
+        servo = new MalosDrive(MalosTarget.SERVO, deviceIp);
         startDrivers();
         instanceUI();
         outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
@@ -372,6 +385,7 @@ public class MainActivity extends BaseActivity {
         uv.stop();
         everloop.stop();
         imu.stop();
+        servo.stop();
     }
 
     public void disableCurrentConfig(){
@@ -379,8 +393,6 @@ public class MainActivity extends BaseActivity {
         setTargetConfig(false);
         onConfigDevice=true;
     }
-
-
 
     /***********************************************************
      * FRAGMENTS METHODS

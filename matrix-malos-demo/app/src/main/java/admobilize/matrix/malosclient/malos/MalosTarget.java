@@ -15,6 +15,7 @@ public class MalosTarget {
     public static final int HUMIDITY   = 20017;
     public static final int UV         = 20013 + (4 * 4);
     public static final int EVERLOOP   = 20013 + 8;
+    public static final int SERVO      = 20013 + 32;
 
     private int baseport;
     private String host;
