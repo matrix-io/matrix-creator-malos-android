@@ -50,6 +50,7 @@ public class MainActivity extends BaseActivity {
     private MalosDrive uv;
     private MalosDrive everloop;
     private MalosDrive imu;
+    private MalosDrive pressure;
 
     private int red, green, blue;
     private Handler handler = new Handler();
@@ -184,6 +185,28 @@ public class MainActivity extends BaseActivity {
         }
     };
 
+    private OnSubscriptionCallBack onPressureDataCallBack = new OnSubscriptionCallBack() {
+        @Override
+        public void onReceiveData(String host, final byte[] data) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Driver.Pressure pressureData = null;
+                    try {
+                        pressureData = Driver.Pressure.parseFrom(data);
+                        if(VERBOSE)Log.d(TAG,"onPressure Altitude: "+pressureData.getAltitude());
+                        if(VERBOSE)Log.d(TAG,"onPressure Pressure: "+pressureData.getPressure());
+                        if(VERBOSE)Log.d(TAG,"onPressure Temperature: "+pressureData.getTemperature());
+                    } catch (InvalidProtocolBufferException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        }
+    };
+
 
     /******************************************************************
      * CONFIG MALOS SENSORS
@@ -243,30 +266,14 @@ public class MainActivity extends BaseActivity {
      * PING TO SENSORS
      ***********************************************************/
 
-    public void requestHumidityData(){
-        humidity.push("");
-    }
-
-    public void requestUVData(){
-        uv.push("");
-    }
-
-    public void requestIMUData(){
-        imu.push("");
-    }
-
-    public void requestGpioData(){
-        gpio.push("");
-    }
-
     @Override
     void pingDevices() {
         if(VERBOSE)Log.i(TAG,"pingDevices..");
-        requestHumidityData();
-        requestUVData();
-        requestIMUData();
-        requestIMUData();
-        requestGpioData();
+        humidity.ping();
+        uv.ping();
+        imu.ping();
+        gpio.ping();
+        pressure.ping();
     }
 
 
@@ -343,6 +350,7 @@ public class MainActivity extends BaseActivity {
         uv = new MalosDrive(MalosTarget.UV, deviceIp);
         everloop = new MalosDrive(MalosTarget.EVERLOOP, deviceIp);
         imu = new MalosDrive(MalosTarget.IMU, deviceIp);
+        pressure = new MalosDrive(MalosTarget.PRESSURE, deviceIp);
         startDrivers();
         instanceUI();
         outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
@@ -360,6 +368,8 @@ public class MainActivity extends BaseActivity {
         gpio.subscribe(onGpioInputCallBack);
         humidity.subscribe(onHumidityDataCallBack);
         imu.subscribe(onIMUDataCallBack);
+        pressure.subscribe(onPressureDataCallBack);
+
         startPingTimer();
     }
 
