@@ -26,6 +26,7 @@ public class MalosDrive {
     private ZMQ.Socket push_socket;
     private ZMQ.Socket req_socket;
 
+
     public interface OnSubscriptionCallBack {
         void onReceiveData(String host, byte[] data);
     }
@@ -52,6 +53,10 @@ public class MalosDrive {
 
     public void stop() {
         new ZeroMQstop().execute();
+    }
+
+    public void ping() {
+        push("");
     }
 
     public DriverConfig.Builder getBasicConfig() {
