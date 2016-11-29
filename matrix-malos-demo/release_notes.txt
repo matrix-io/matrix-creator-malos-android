@@ -1,5 +1,11 @@
 20161123
-- Fix Matrix connectio before start hardware driver connection
+- Fix crash on set manual targen on old android devices
+- Fix crash on background
+- Add pressure sensor (altitude, temp and pressure)
+- Reduce IMU widget and add Mic widget (not functional)
+- Refactor Malos driver package
+20161123
+- Fix Matrix connection before start hardware driver connection
 - Best stop/resume app flow
 - fix some crash bugs
 - Add first version of GPIO updates callback (need Malos master version)
