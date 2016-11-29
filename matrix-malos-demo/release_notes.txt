@@ -1,4 +1,4 @@
-20161123
+20161128
 - Fix crash on set manual target on old android devices
 - Fix crash on set background
 - Add pressure sensor (altitude, temp and pressure)
