@@ -38,7 +38,7 @@ For more info: [MALOS](https://github.com/matrix-io/matrix-creator-quickstart/wi
 * Android 4.x or later
 
 ## Download
-Pre-releases for testing, please download [here](https://github.com/matrix-io/matrix-creator-malos-android/releases)(Devel branch)
+Pre-releases for testing, please download [here](https://github.com/matrix-io/matrix-creator-malos-android/releases).
 
 ## Preriquisities and dependencies for Build
 
