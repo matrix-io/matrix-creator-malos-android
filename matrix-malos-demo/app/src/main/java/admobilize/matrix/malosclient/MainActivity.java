@@ -133,7 +133,7 @@ public class MainActivity extends BaseActivity {
                         Humidity humidity = Humidity.parseFrom(data);
                         if(VERBOSE)Log.d(TAG,"onHumidityDataCallBack humidity: "+humidity.getHumidity());
                         if(VERBOSE)Log.d(TAG,"onHumidityDataCallBack temperature: "+humidity.getTemperature());
-                        temp_value.setText(""+((int)(humidity.getTemperature()*10))/10.0f+"º");
+                        humi_temp_value.setText(""+((int)(humidity.getTemperature()*10))/10.0f+"º");
                         humi_value.setText(""+((int)(humidity.getHumidity()*10))/10.0f);
                     } catch (InvalidProtocolBufferException e) {
                         e.printStackTrace();
@@ -194,9 +194,15 @@ public class MainActivity extends BaseActivity {
                     Driver.Pressure pressureData = null;
                     try {
                         pressureData = Driver.Pressure.parseFrom(data);
-                        if(VERBOSE)Log.d(TAG,"onPressure Altitude: "+pressureData.getAltitude());
                         if(VERBOSE)Log.d(TAG,"onPressure Pressure: "+pressureData.getPressure());
+                        if(VERBOSE)Log.d(TAG,"onPressure Altitude: "+pressureData.getAltitude());
                         if(VERBOSE)Log.d(TAG,"onPressure Temperature: "+pressureData.getTemperature());
+                        String press_format = new DecimalFormat("##.##").format(pressureData.getPressure()/100);
+                        String alti_format  = new DecimalFormat("##.#").format(pressureData.getAltitude());
+                        String temp_format  = new DecimalFormat("##.##").format(pressureData.getTemperature());
+                        press_value.setText(press_format);
+                        press_alti_value.setText(alti_format+"m");
+                        press_temp_value.setText(temp_format+"º");
                     } catch (InvalidProtocolBufferException e) {
                         e.printStackTrace();
                     }
@@ -249,7 +255,6 @@ public class MainActivity extends BaseActivity {
         DriverConfig.Builder config = humidity.getBasicConfig();
         HumidityParams.Builder params = HumidityParams.newBuilder();
         params.setCurrentTemperature(23.0f);
-        params.setDoCalibration(true);
         config.setHumidity(params);
         config.setDelayBetweenUpdates(0.500f);
         humidity.config(config);
