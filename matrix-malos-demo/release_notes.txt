@@ -1,9 +1,10 @@
 20161123
-- Fix crash on set manual targen on old android devices
-- Fix crash on background
+- Fix crash on set manual target on old android devices
+- Fix crash on set background
 - Add pressure sensor (altitude, temp and pressure)
 - Reduce IMU widget and add Mic widget (not functional)
 - Refactor Malos driver package
+
 20161123
 - Fix Matrix connection before start hardware driver connection
 - Best stop/resume app flow
@@ -12,7 +13,6 @@
 
 20161118
 - Fix some ZeroMQ thread crash
-
 
 20161118
 - First signed release
