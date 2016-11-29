@@ -18,7 +18,7 @@
 		<item name="android:includeFontPadding">false</item>
 	</style>
 	<style name="DemoKitControlLabel" parent="@style/DemoKitTextBase">
-		<item name="android:textSize">15dip</item>
+		<item name="android:textSize">14dip</item>
 		<item name="android:textColor">@color/DemoKitLabelGray</item>
 		<item name="android:includeFontPadding">true</item>
 		<item name="android:layout_height">25dip</item>
@@ -39,7 +39,7 @@
 		<item name="android:layout_gravity">top</item>
 	</style>
 	<style name="DemoKitMeasurementTiny" parent="@style/DemoKitTextBase">
-		<item name="android:textSize">32dip</item>
+		<item name="android:textSize">20dip</item>
 		<item name="android:layout_marginTop">-4dip</item>
 		<item name="android:layout_marginBottom">0dip</item>
 		<item name="android:layout_gravity">top</item>
@@ -52,7 +52,8 @@
 		<item name="android:textSize">30dip</item>
 	</style>
 	<style name="DemoKitMeasurementSuffix" parent="@style/DemoKitMeasurement">
-		<item name="android:textSize">20dip</item>
+		<item name="android:textSize">16dip</item>
+		<item name="android:layout_marginTop">-2dip</item>
 	</style>
 	<style name="DemoKitButtonDisplay">
 		<item name="android:layout_height">wrap_content</item>
