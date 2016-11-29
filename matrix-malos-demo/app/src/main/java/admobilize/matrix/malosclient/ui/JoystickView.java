@@ -50,8 +50,8 @@ public class JoystickView extends View {
 		fPressed = false;
 		Resources r = context.getResources();
 		mJoystickBackground = r.getDrawable(R.drawable.joystick_background);
-		int w = mJoystickBackground.getIntrinsicWidth();
-		int h = mJoystickBackground.getIntrinsicHeight();
+		int w = mJoystickBackground.getIntrinsicWidth()/2;
+		int h = mJoystickBackground.getIntrinsicHeight()/2;
 		mJoystickBackground.setBounds(0, 0, w, h);
 		mJoystickPressed = r.getDrawable(R.drawable.joystick_pressed_holo_dark);
 		mJoystickNormal = r.getDrawable(R.drawable.joystick_normal_holo_dark);
@@ -69,8 +69,8 @@ public class JoystickView extends View {
 	protected void onDraw(Canvas canvas) {
 		mJoystickBackground.draw(canvas);
 		Drawable indicator = fPressed ? mJoystickPressed : mJoystickNormal;
-		int w = mJoystickBackground.getIntrinsicWidth();
-		int h = mJoystickBackground.getIntrinsicHeight();
+		int w = mJoystickBackground.getIntrinsicWidth()/2;
+		int h = mJoystickBackground.getIntrinsicHeight()/2;
 		int x = w / 2 - 4 + fX;
 		int y = h / 2 + 4 + fY;
 		Utilities.centerAround(x, y, indicator);
@@ -80,8 +80,8 @@ public class JoystickView extends View {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		setMeasuredDimension(mJoystickBackground.getIntrinsicWidth(),
-				mJoystickBackground.getIntrinsicHeight());
+		setMeasuredDimension(mJoystickBackground.getIntrinsicWidth()/2,
+				mJoystickBackground.getIntrinsicHeight()/2);
 	}
 
 }
