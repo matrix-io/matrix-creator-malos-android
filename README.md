@@ -38,7 +38,7 @@ For more info: [MALOS](https://github.com/matrix-io/matrix-creator-quickstart/wi
 * Android 4.x or later
 
 ## Download
-Pre-release for testing: [rev351](https://github.com/matrix-io/matrix-creator-malos-android/releases)(Devel branch)
+Pre-releases for testing, please download [here](https://github.com/matrix-io/matrix-creator-malos-android/releases)(Devel branch)
 
 ## Preriquisities and dependencies for Build
 
@@ -54,7 +54,7 @@ create file matrix-malos-demo/app/fabric.properties with:
 apiSecret=<YOUR FABRIC SECRET>
 apiKey=<YOUR FABRIC API KEY>
 ```
-(or open your project on android studio and config crashlytics fabric plugin.
+(or open your project on AndroidStudio and config crashlytics fabric plugin.
 
 #### Building and install
 ```
