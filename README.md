@@ -18,7 +18,7 @@ alt="Matrix Creator Android-MALOS demo" width="234" height="180" border="5" /></
 
 ## TODO
 - [X] GPIO callback
-- [ ] Pressure
+- [X] Pressure
 - [ ] Mic Array visualization (beamforming localization)
 - [ ] ZigbeeBulb basic control
 - [ ] LIRC custom control config
