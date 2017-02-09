@@ -1,5 +1,8 @@
 package admobilize.matrix.malosclient;
 
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -55,7 +58,8 @@ public class MainActivity extends BaseActivity {
     private int red, green, blue;
     private Handler handler = new Handler();
     private MalosDrive deviceInfo;
-
+    private Ringtone r;
+    private boolean previousSetGpio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +76,9 @@ public class MainActivity extends BaseActivity {
             deviceInfo = new MalosDrive(MalosTarget.DEVICEINFO, matrix.getIpAddress());
             deviceInfo.request(onMatrixDetection);
         }
+
+        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        r = RingtoneManager.getRingtone(getApplicationContext(), notification);
     }
 
     /******************************************************************
@@ -83,11 +90,11 @@ public class MainActivity extends BaseActivity {
             if (isChecked) {
                 if(DEBUG)Log.i(TAG,"outputButton on");
                 outputButton.setBackgroundDrawable(mOnBackground);
-                configGpioOuputValue(0,1);
+                configGpioOuputValue(15,1);
             } else {
                 if(DEBUG)Log.i(TAG,"outputButton off");
                 outputButton.setBackgroundDrawable(mOffBackground);
-                configGpioOuputValue(0,0);
+                configGpioOuputValue(15,0);
             }
         }
     };
@@ -105,8 +112,15 @@ public class MainActivity extends BaseActivity {
                         int pin_output_mask = 0x1 << Config.GPIO_DEMO_OUTPUT;
                         int pin_input_mask  = 0x1 << Config.GPIO_DEMO_INPUT;
 
-                        if(((gpio_data & pin_input_mask) >> Config.GPIO_DEMO_INPUT)==1)inputButton.setImageDrawable(mOnImage);
-                        else inputButton.setImageDrawable(mOffImage);
+                        if(((gpio_data & pin_input_mask) >> Config.GPIO_DEMO_INPUT)==1){
+                            inputButton.setImageDrawable(mOnImage);
+                            previousSetGpio=true;
+                            r.stop();
+                        }
+                        else {
+                            inputButton.setImageDrawable(mOffImage);
+                            if(previousSetGpio)r.play();
+                        }
                         // output button state (for refresh multiple devices):
                         if(((gpio_data & pin_output_mask) >> Config.GPIO_DEMO_OUTPUT)==1)outputButton.setChecked(true);
                         else outputButton.setChecked(false);
@@ -133,7 +147,7 @@ public class MainActivity extends BaseActivity {
                         Humidity humidity = Humidity.parseFrom(data);
                         if(VERBOSE)Log.d(TAG,"onHumidityDataCallBack humidity: "+humidity.getHumidity());
                         if(VERBOSE)Log.d(TAG,"onHumidityDataCallBack temperature: "+humidity.getTemperature());
-                        humi_temp_value.setText(""+((int)(humidity.getTemperature()*10))/10.0f+"º");
+                        humi_temp_value.setText(""+((int)(humidity.getTemperatureRaw()*10))/10.0f+"º");
                         humi_value.setText(""+((int)(humidity.getHumidity()*10))/10.0f);
                     } catch (InvalidProtocolBufferException e) {
                         e.printStackTrace();
@@ -209,10 +223,8 @@ public class MainActivity extends BaseActivity {
 
                 }
             });
-
         }
     };
-
 
     /******************************************************************
      * CONFIG MALOS SENSORS

@@ -98,12 +98,13 @@ protobuf {
 
 }
 
-task loadMalosProtos (type: Exec){
-    print "Loading protos definitions.."
-    mkdir('src/main/proto')
-    commandLine 'cp', '../../protocol-buffers/malos/driver.proto', 'src/main/proto/'
+task loadMatrixLabsProtos (type: Exec){
+    print "Loading malos protos definitions.."
+    mkdir('src/main/proto/matrixlabs_pb')
+    commandLine 'cp', '-r', '../../protocol-buffers', 'src/main/proto/matrixlabs_pb/public'
     println "done"
 }
-preBuild.dependsOn loadMalosProtos
+
+preBuild.dependsOn loadMatrixLabsProtos
 
 
