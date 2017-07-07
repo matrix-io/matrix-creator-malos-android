@@ -20,7 +20,6 @@ if(project.hasProperty("matrix_malos.signing") && new File(project.property("mat
     apply from: project.property("matrix_malos.signing") + ".gradle";
 }
 
-
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.3"
@@ -52,15 +51,12 @@ android {
             ext.betaDistributionReleaseNotesFilePath="release_notes.txt"
         }
     }
-
     sourceSets {
         main {
             proto {
-
             }
         }
     }
-
 }
 
 dependencies {
@@ -78,8 +74,6 @@ dependencies {
         transitive = true;
     }
 }
-
-
 protobuf {
     plugins {
         javalite {
@@ -95,7 +89,6 @@ protobuf {
         }
     }
     generatedFilesBaseDir = "$projectDir/build/generated"
-
 }
 
 task loadMatrixLabsProtos (type: Exec){
