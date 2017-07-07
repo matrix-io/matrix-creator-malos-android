@@ -10,6 +10,15 @@ import android.widget.CompoundButton;
 import com.crashlytics.android.Crashlytics;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.iamhabib.easy_preference.EasyPreference;
+import com.matrixio.malos.v1.DriverConfig;
+import com.matrixio.malos.v1.EverloopImage;
+import com.matrixio.malos.v1.GpioParams;
+import com.matrixio.malos.v1.Humidity;
+import com.matrixio.malos.v1.HumidityParams;
+import com.matrixio.malos.v1.Imu;
+import com.matrixio.malos.v1.LedValue;
+import com.matrixio.malos.v1.Pressure;
+import com.matrixio.malos.v1.UV;
 
 import io.fabric.sdk.android.Fabric;
 import java.text.DecimalFormat;
@@ -21,18 +30,9 @@ import admobilize.matrix.malosclient.network.Discovery;
 import admobilize.matrix.malosclient.ui.IPTargetInputFragment;
 import admobilize.matrix.malosclient.ui.InfoFragment;
 import admobilize.matrix.malosclient.utils.Storage;
-import matrix_malos.Driver;
-import matrix_malos.Driver.GpioParams.Builder;
 
 import static admobilize.matrix.malosclient.malos.MalosDrive.OnSubscriptionCallBack;
 import static android.widget.CompoundButton.OnCheckedChangeListener;
-import static matrix_malos.Driver.DriverConfig;
-import static matrix_malos.Driver.EverloopImage;
-import static matrix_malos.Driver.GpioParams;
-import static matrix_malos.Driver.Humidity;
-import static matrix_malos.Driver.HumidityParams;
-import static matrix_malos.Driver.LedValue;
-import static matrix_malos.Driver.UV;
 
 /**
  * Created by Antonio Vanegas @hpsaturn on 11/12/16.
@@ -186,7 +186,7 @@ public class MainActivity extends BaseActivity {
                 @Override
                 public void run() {
                     try {
-                        Driver.Imu imudata = imudata = Driver.Imu.parseFrom(data);
+                        Imu imudata = imudata = Imu.parseFrom(data);
                         if(VERBOSE)Log.d(TAG,"Yaw => "+imudata.getYaw());
                         if(VERBOSE)Log.d(TAG,"Roll => "+imudata.getRoll());
                         if(VERBOSE)Log.d(TAG,"Pitch => "+imudata.getPitch());
@@ -205,9 +205,9 @@ public class MainActivity extends BaseActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Driver.Pressure pressureData = null;
+                    Pressure pressureData = null;
                     try {
-                        pressureData = Driver.Pressure.parseFrom(data);
+                        pressureData = Pressure.parseFrom(data);
                         if(VERBOSE)Log.d(TAG,"onPressure Pressure: "+pressureData.getPressure());
                         if(VERBOSE)Log.d(TAG,"onPressure Altitude: "+pressureData.getAltitude());
                         if(VERBOSE)Log.d(TAG,"onPressure Temperature: "+pressureData.getTemperature());
@@ -231,7 +231,7 @@ public class MainActivity extends BaseActivity {
      ******************************************************************/
 
     public void configGpioOuputValue(int pin, int value){
-        Builder gpioParams = GpioParams.newBuilder();
+        GpioParams.Builder gpioParams = GpioParams.newBuilder();
         gpioParams.setPin(pin);
         gpioParams.setModeValue(GpioParams.EnumMode.OUTPUT_VALUE);
         gpioParams.setValue(value);
@@ -240,7 +240,7 @@ public class MainActivity extends BaseActivity {
 
     public void configGpioInputValue(int pin){
         DriverConfig.Builder config = gpio.getBasicConfig();
-        Builder gpioParams = GpioParams.newBuilder();
+        GpioParams.Builder gpioParams = GpioParams.newBuilder();
         gpioParams.setPin(pin);
         gpioParams.setModeValue(GpioParams.EnumMode.INPUT_VALUE);
         config.setDelayBetweenUpdates(0.100f);
