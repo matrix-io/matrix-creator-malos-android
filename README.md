@@ -1,7 +1,7 @@
 # Matrix Creator Android MALOS Demo
 Android application that interfaces with MATRIX Creator MALOS layer. <a href="https://github.com/matrix-io/matrix-creator-malos-android/blob/master/screenshot.jpg"><img src="https://github.com/matrix-io/matrix-creator-malos-android/blob/master/screenshot.jpg" align="right" height="426" width="240" ></a>
 
-**WARNING**: Actual version only works with MALOS developer version, please see [prerequisites](#Preriquisities) section.
+**WARNING**: Actual version only works with MALOS developer version, please see [prerequisites](#preriquisities) section.
 
 ## Current Features
 
@@ -65,7 +65,7 @@ create file matrix-malos-demo/app/fabric.properties with:
 apiSecret=<YOUR FABRIC SECRET>
 apiKey=<YOUR FABRIC API KEY>
 ```
-(or open your project on AndroidStudio and config crashlytics fabric plugin.
+(or open your project on AndroidStudio and config crashlytics fabric plugin or remove this dependency on gradle app file)
 
 #### Building and install
 
