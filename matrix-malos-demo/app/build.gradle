@@ -75,7 +75,7 @@ dependencies {
     compile 'io.grpc:grpc-stub:1.1.2'
     compile 'com.iamhabib:easy-preference:1.0.1'
     compile 'javax.annotation:javax.annotation-api:1.2'
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.5@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
     }
 }
