@@ -1,3 +1,6 @@
+20170713
+- New protobuf namespaces
+
 20161128
 - Fix crash on set manual target on old android devices
 - Fix crash on set background
