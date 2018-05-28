@@ -29,7 +29,7 @@ alt="Matrix Creator Android-MALOS demo" width="234" height="180" border="5" /></
 
 ## Preriquisities
 
-* Only install for now developer version of MALOS deb package on your RaspberryPi and reboot it:
+* Please install MALOS service package on your RaspberryPi and reboot it:
 
 ``` bash
 curl https://apt.matrix.one/doc/apt-key.gpg | sudo apt-key add -
@@ -41,7 +41,7 @@ reboot
 ```
 
 **NOTE**: 
-* For more details: [Getting Started Guide](https://matrix-io.github.io/matrix-documentation/MALOS/overview/)
+* For more details: [Getting Started Guide](https://matrix-io.github.io/matrix-documentation/matrix-core/)
 * Your creator on the same network
 * Android 4.x or later
 
