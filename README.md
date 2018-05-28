@@ -31,13 +31,12 @@ alt="Matrix Creator Android-MALOS demo" width="234" height="180" border="5" /></
 
 * Only install for now developer version of MALOS deb package on your RaspberryPi and reboot it:
 
-```
-echo "deb http://packages.matrix.one/matrix-creator/ ./" | sudo tee --append /etc/apt/sources.list
-echo "deb http://unstable-packages.matrix.one/ stable main" | sudo tee -a /etc/apt/sources.list
-sudo apt-get update
-sudo apt-get clean
-sudo apt-get upgrade
-sudo apt-get install -y libzmq3-dev xc3sprog matrix-creator-malos wiringpi matrix-creator-init cmake g++ git --force-yes
+``` bash
+curl https://apt.matrix.one/doc/apt-key.gpg | sudo apt-key add -
+echo "deb https://apt.matrix.one/raspbian $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/matrixlabs.list
+sudo apt update
+sudo apt upgrade
+sudo apt install matrixio-malos
 reboot
 ```
 
