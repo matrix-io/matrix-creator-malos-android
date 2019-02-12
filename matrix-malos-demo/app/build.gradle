@@ -56,6 +56,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'
+    implementation 'org.zeromq:jeromq:0.3.5'
     implementation 'io.grpc:grpc-okhttp:1.10.0'
     implementation 'io.grpc:grpc-protobuf-lite:1.10.0'
     implementation 'io.grpc:grpc-stub:1.10.0'
