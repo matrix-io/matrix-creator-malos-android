@@ -1,3 +1,8 @@
+20190219 rev399 (fixed gradle and AndroidTools)
+- fix some fabric issues
+- updated target API
+- new support API to 19
+
 20170713
 - New protobuf namespaces
 
