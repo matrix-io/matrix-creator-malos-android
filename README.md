@@ -57,12 +57,12 @@ cd matrix-creator-malos-android
 
 #### Fabric configuration
 
-create file matrix-malos-demo/app/fabric.properties with:
+create file `matrix-malos-demo/app/fabric.properties` with:
 ```
 apiSecret=<YOUR FABRIC SECRET>
 apiKey=<YOUR FABRIC API KEY>
 ```
-(or open your project on AndroidStudio and config crashlytics fabric plugin or remove this dependency on gradle app file)
+(or import the project on AndroidStudio and config `Crashlytics fabric plugin` or `remove` this dependency on gradle app file)
 
 #### Building and install
 
@@ -70,4 +70,3 @@ apiKey=<YOUR FABRIC API KEY>
 ./gradlew assembleDebug
 ./gradlew installDebug
 ```
-(or please import this project to AndroidStudio)
