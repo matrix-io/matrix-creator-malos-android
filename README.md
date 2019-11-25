@@ -1,8 +1,6 @@
 # Matrix Creator Android MALOS Demo
 Android application that interfaces with MATRIX Creator MALOS layer. <a href="https://github.com/matrix-io/matrix-creator-malos-android/blob/master/screenshot.jpg"><img src="https://github.com/matrix-io/matrix-creator-malos-android/blob/master/screenshot.jpg" align="right" height="426" width="240" ></a>
 
-**WARNING**: Actual version only works with MALOS developer version, please see [prerequisites](#preriquisities) section.
-
 ## Current Features
 
 * Everloop RGB color control
@@ -31,7 +29,7 @@ alt="Matrix Creator Android-MALOS demo" width="234" height="180" border="5" /></
 
 * Please install **Matrix Creator CORE** (MALOS service package) on your RaspberryPi and reboot it:
 
-``` bash
+```bash
 curl https://apt.matrix.one/doc/apt-key.gpg | sudo apt-key add -
 echo "deb https://apt.matrix.one/raspbian $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/matrixlabs.list
 sudo apt update
@@ -42,17 +40,17 @@ reboot
 
 **NOTE**: 
 * For more details: [Getting Started Guide](https://matrix-io.github.io/matrix-documentation/matrix-core/getting-started/core-installation/)
-* Your creator on the same network
-* Android 4.4.x or later
+* Please put your creator on the same network
+* Android supported 4.4.x or later (target API28)
 
-## Download
-Pre-releases for testing, please download [here](https://github.com/matrix-io/matrix-creator-malos-android/releases).
+## Download APK
+Pre-release demo, please download [here](https://github.com/matrix-io/matrix-creator-malos-android/releases).
 
 ## Preriquisities and dependencies for Build
 
 #### Clone repository and submodules
 
-```
+```bash
 git clone --recursive https://github.com/matrix-io/matrix-creator-malos-android.git
 cd matrix-creator-malos-android
 ```
@@ -68,9 +66,8 @@ apiKey=<YOUR FABRIC API KEY>
 
 #### Building and install
 
-```
+```bash
 ./gradlew assembleDebug
 ./gradlew installDebug
 ```
-(or with AndroidStudio IDE)
-
+(or please import this project to AndroidStudio)
