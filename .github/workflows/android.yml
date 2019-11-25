@@ -13,5 +13,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    - name: Load project git submodules
+      run: git submodule update --init --recursive
     - name: Build with Gradle
       run: cd matrix-malos-demo && ./cibuild.sh
