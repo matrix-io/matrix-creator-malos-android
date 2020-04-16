@@ -3,13 +3,13 @@ package admobilize.matrix.malosclient.malos;
 import android.util.Log;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.matrixio.malos.v1.DriverInfo;
-import com.matrixio.malos.v1.MalosDriverInfo;
 
 import java.util.Iterator;
 import java.util.List;
 
 import admobilize.matrix.malosclient.Config;
+import one.matrixio.proto.malos.v1.DriverInfo;
+import one.matrixio.proto.malos.v1.MalosDriverInfo;
 
 /**
  * Created by Antonio Vanegas @hpsaturn on 11/13/16.

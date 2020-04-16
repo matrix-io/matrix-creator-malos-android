@@ -3,11 +3,11 @@ package admobilize.matrix.malosclient.malos;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.matrixio.malos.v1.DriverConfig;
 
 import org.zeromq.ZMQ;
 
 import admobilize.matrix.malosclient.Config;
+import one.matrixio.proto.malos.v1.DriverConfig;
 
 /**
  * Created by Antonio Vanegas @hpsaturn on 11/10/16.
