@@ -63,6 +63,8 @@ dependencies {
     implementation 'com.iamhabib:easy-preference:1.0.1'
     implementation 'javax.annotation:javax.annotation-api:1.2'
 
+    protobuf 'com.google.protobuf:protobuf-java:3.0.2'
+
     implementation ('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
         transitive = true;
     }
