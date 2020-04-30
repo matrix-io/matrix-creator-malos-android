@@ -13,8 +13,8 @@ android {
         applicationId "admobilize.matrix.malosclient"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 417
-        versionName "1.2.2"
+        versionCode 426
+        versionName "1.2.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -55,7 +55,7 @@ dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.google.android.material:material:1.1.0'
     implementation 'org.zeromq:jeromq:0.3.5'
     implementation 'io.grpc:grpc-okhttp:1.10.0'
     implementation 'io.grpc:grpc-protobuf-lite:1.10.0'
@@ -63,9 +63,9 @@ dependencies {
     implementation 'com.iamhabib:easy-preference:1.0.1'
     implementation 'javax.annotation:javax.annotation-api:1.2'
 
-    protobuf 'com.google.protobuf:protobuf-java:3.0.2'
+    protobuf 'com.google.protobuf:protobuf-java:3.4.0'
 
-    implementation ('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
+    implementation ('com.crashlytics.sdk.android:crashlytics:2.10.1@aar') {
         transitive = true;
     }
 
