@@ -29,6 +29,7 @@ import one.matrixio.proto.malos.v1.HumidityParams;
 import one.matrixio.proto.malos.v1.Imu;
 import one.matrixio.proto.malos.v1.LedValue;
 import one.matrixio.proto.malos.v1.Pressure;
+import one.matrixio.proto.malos.v1.ServoParams;
 import one.matrixio.proto.malos.v1.UV;
 
 import static admobilize.matrix.malosclient.malos.MalosDrive.OnSubscriptionCallBack;
@@ -59,7 +60,6 @@ public class MainActivity extends BaseActivity {
 
     private int red, green, blue;
     private Handler handler = new Handler();
-    private MalosDrive deviceInfo;
     private Ringtone r;
     private boolean previousSetGpio;
 
@@ -285,8 +285,8 @@ public class MainActivity extends BaseActivity {
     }
 
     public void configServoDriver(int pin, int angle){
-        DriverConfig.Builder config = DriverConfig.newBuilder();
-        Driver.ServoParams.Builder servoParams = Driver.ServoParams.newBuilder();
+        DriverConfig.Builder config = servo.getBasicConfig();
+        ServoParams.Builder servoParams = ServoParams.newBuilder();
         servoParams.setAngle(angle);
         servoParams.setAngle(pin);
         config.setServo(servoParams);
