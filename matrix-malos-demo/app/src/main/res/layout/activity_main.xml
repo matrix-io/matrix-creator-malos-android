@@ -81,13 +81,33 @@
 
 
     <FrameLayout
-        android:layout_width="match_parent"
+        android:id="@+id/fl_imu_container"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/fl_main_leds">
+        android:layout_below="@+id/fl_main_leds"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="3dp">
 
         <include
-            layout="@layout/joycontainer"
-            android:layout_width="match_parent"
+            layout="@layout/imucontainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
+
+
+    <FrameLayout
+        android:id="@+id/fl_mic_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/fl_imu_container"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="-15dp">
+
+        <include
+            layout="@layout/miccontainer"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </FrameLayout>
 

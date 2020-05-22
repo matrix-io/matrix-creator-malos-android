@@ -1,5 +1,8 @@
 package admobilize.matrix.malosclient;
 
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -18,18 +21,18 @@ import admobilize.matrix.malosclient.network.Discovery;
 import admobilize.matrix.malosclient.ui.IPTargetInputFragment;
 import admobilize.matrix.malosclient.ui.InfoFragment;
 import admobilize.matrix.malosclient.utils.Storage;
-import matrix_malos.Driver;
-import matrix_malos.Driver.GpioParams.Builder;
+import one.matrixio.proto.malos.v1.DriverConfig;
+import one.matrixio.proto.malos.v1.EverloopImage;
+import one.matrixio.proto.malos.v1.GpioParams;
+import one.matrixio.proto.malos.v1.Humidity;
+import one.matrixio.proto.malos.v1.HumidityParams;
+import one.matrixio.proto.malos.v1.Imu;
+import one.matrixio.proto.malos.v1.LedValue;
+import one.matrixio.proto.malos.v1.Pressure;
+import one.matrixio.proto.malos.v1.UV;
 
 import static admobilize.matrix.malosclient.malos.MalosDrive.OnSubscriptionCallBack;
 import static android.widget.CompoundButton.OnCheckedChangeListener;
-import static matrix_malos.Driver.DriverConfig;
-import static matrix_malos.Driver.EverloopImage;
-import static matrix_malos.Driver.GpioParams;
-import static matrix_malos.Driver.Humidity;
-import static matrix_malos.Driver.HumidityParams;
-import static matrix_malos.Driver.LedValue;
-import static matrix_malos.Driver.UV;
 
 /**
  * Created by Antonio Vanegas @hpsaturn on 11/12/16.
@@ -52,9 +55,13 @@ public class MainActivity extends BaseActivity {
     private MalosDrive everloop;
     private MalosDrive imu;
     private MalosDrive servo;
+    private MalosDrive pressure;
 
     private int red, green, blue;
     private Handler handler = new Handler();
+    private MalosDrive deviceInfo;
+    private Ringtone r;
+    private boolean previousSetGpio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +78,9 @@ public class MainActivity extends BaseActivity {
             deviceInfo = new MalosDrive(MalosTarget.DEVICEINFO, matrix.getIpAddress());
             deviceInfo.request(onMatrixDetection);
         }
+
+        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        r = RingtoneManager.getRingtone(getApplicationContext(), notification);
     }
 
     /******************************************************************
@@ -82,11 +92,11 @@ public class MainActivity extends BaseActivity {
             if (isChecked) {
                 if(DEBUG)Log.i(TAG,"outputButton on");
                 outputButton.setBackgroundDrawable(mOnBackground);
-                configGpioOuputValue(0,1);
+                configGpioOuputValue(15,1);
             } else {
                 if(DEBUG)Log.i(TAG,"outputButton off");
                 outputButton.setBackgroundDrawable(mOffBackground);
-                configGpioOuputValue(0,0);
+                configGpioOuputValue(15,0);
             }
         }
     };
@@ -104,8 +114,15 @@ public class MainActivity extends BaseActivity {
                         int pin_output_mask = 0x1 << Config.GPIO_DEMO_OUTPUT;
                         int pin_input_mask  = 0x1 << Config.GPIO_DEMO_INPUT;
 
-                        if(((gpio_data & pin_input_mask) >> Config.GPIO_DEMO_INPUT)==1)inputButton.setImageDrawable(mOnImage);
-                        else inputButton.setImageDrawable(mOffImage);
+                        if(((gpio_data & pin_input_mask) >> Config.GPIO_DEMO_INPUT)==1){
+                            inputButton.setImageDrawable(mOnImage);
+                            previousSetGpio=true;
+                            r.stop();
+                        }
+                        else {
+                            inputButton.setImageDrawable(mOffImage);
+                            if(previousSetGpio)r.play();
+                        }
                         // output button state (for refresh multiple devices):
                         if(((gpio_data & pin_output_mask) >> Config.GPIO_DEMO_OUTPUT)==1)outputButton.setChecked(true);
                         else outputButton.setChecked(false);
@@ -132,7 +149,7 @@ public class MainActivity extends BaseActivity {
                         Humidity humidity = Humidity.parseFrom(data);
                         if(VERBOSE)Log.d(TAG,"onHumidityDataCallBack humidity: "+humidity.getHumidity());
                         if(VERBOSE)Log.d(TAG,"onHumidityDataCallBack temperature: "+humidity.getTemperature());
-                        temp_value.setText(""+((int)(humidity.getTemperature()*10))/10.0f+"º");
+                        humi_temp_value.setText(""+((int)(humidity.getTemperatureRaw()*10))/10.0f+"º");
                         humi_value.setText(""+((int)(humidity.getHumidity()*10))/10.0f);
                     } catch (InvalidProtocolBufferException e) {
                         e.printStackTrace();
@@ -171,7 +188,7 @@ public class MainActivity extends BaseActivity {
                 @Override
                 public void run() {
                     try {
-                        Driver.Imu imudata = imudata = Driver.Imu.parseFrom(data);
+                        Imu imudata = imudata = Imu.parseFrom(data);
                         if(VERBOSE)Log.d(TAG,"Yaw => "+imudata.getYaw());
                         if(VERBOSE)Log.d(TAG,"Roll => "+imudata.getRoll());
                         if(VERBOSE)Log.d(TAG,"Pitch => "+imudata.getPitch());
@@ -184,13 +201,39 @@ public class MainActivity extends BaseActivity {
         }
     };
 
+    private OnSubscriptionCallBack onPressureDataCallBack = new OnSubscriptionCallBack() {
+        @Override
+        public void onReceiveData(String host, final byte[] data) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Pressure pressureData = null;
+                    try {
+                        pressureData = Pressure.parseFrom(data);
+                        if(VERBOSE)Log.d(TAG,"onPressure Pressure: "+pressureData.getPressure());
+                        if(VERBOSE)Log.d(TAG,"onPressure Altitude: "+pressureData.getAltitude());
+                        if(VERBOSE)Log.d(TAG,"onPressure Temperature: "+pressureData.getTemperature());
+                        String press_format = new DecimalFormat("##.##").format(pressureData.getPressure()/100);
+                        String alti_format  = new DecimalFormat("##.#").format(pressureData.getAltitude());
+                        String temp_format  = new DecimalFormat("##.##").format(pressureData.getTemperature());
+                        press_value.setText(press_format);
+                        press_alti_value.setText(alti_format+"m");
+                        press_temp_value.setText(temp_format+"º");
+                    } catch (InvalidProtocolBufferException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+        }
+    };
 
     /******************************************************************
      * CONFIG MALOS SENSORS
      ******************************************************************/
 
     public void configGpioOuputValue(int pin, int value){
-        Builder gpioParams = GpioParams.newBuilder();
+        GpioParams.Builder gpioParams = GpioParams.newBuilder();
         gpioParams.setPin(pin);
         gpioParams.setModeValue(GpioParams.EnumMode.OUTPUT_VALUE);
         gpioParams.setValue(value);
@@ -199,7 +242,7 @@ public class MainActivity extends BaseActivity {
 
     public void configGpioInputValue(int pin){
         DriverConfig.Builder config = gpio.getBasicConfig();
-        Builder gpioParams = GpioParams.newBuilder();
+        GpioParams.Builder gpioParams = GpioParams.newBuilder();
         gpioParams.setPin(pin);
         gpioParams.setModeValue(GpioParams.EnumMode.INPUT_VALUE);
         config.setDelayBetweenUpdates(0.100f);
@@ -229,7 +272,6 @@ public class MainActivity extends BaseActivity {
         DriverConfig.Builder config = humidity.getBasicConfig();
         HumidityParams.Builder params = HumidityParams.newBuilder();
         params.setCurrentTemperature(23.0f);
-        params.setDoCalibration(true);
         config.setHumidity(params);
         config.setDelayBetweenUpdates(0.500f);
         humidity.config(config);
@@ -255,30 +297,14 @@ public class MainActivity extends BaseActivity {
      * PING TO SENSORS
      ***********************************************************/
 
-    public void requestHumidityData(){
-        humidity.push("");
-    }
-
-    public void requestUVData(){
-        uv.push("");
-    }
-
-    public void requestIMUData(){
-        imu.push("");
-    }
-
-    public void requestGpioData(){
-        gpio.push("");
-    }
-
     @Override
     void pingDevices() {
         if(VERBOSE)Log.i(TAG,"pingDevices..");
-        requestHumidityData();
-        requestUVData();
-        requestIMUData();
-        requestIMUData();
-        requestGpioData();
+        humidity.ping();
+        uv.ping();
+        imu.ping();
+        gpio.ping();
+        pressure.ping();
     }
 
 
@@ -356,6 +382,7 @@ public class MainActivity extends BaseActivity {
         everloop = new MalosDrive(MalosTarget.EVERLOOP, deviceIp);
         imu = new MalosDrive(MalosTarget.IMU, deviceIp);
         servo = new MalosDrive(MalosTarget.SERVO, deviceIp);
+        pressure = new MalosDrive(MalosTarget.PRESSURE, deviceIp);
         startDrivers();
         instanceUI();
         outputButton.setOnCheckedChangeListener(onCheckedGpioToggleButton);
@@ -373,6 +400,8 @@ public class MainActivity extends BaseActivity {
         gpio.subscribe(onGpioInputCallBack);
         humidity.subscribe(onHumidityDataCallBack);
         imu.subscribe(onIMUDataCallBack);
+        pressure.subscribe(onPressureDataCallBack);
+
         startPingTimer();
     }
 

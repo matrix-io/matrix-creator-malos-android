@@ -2,11 +2,11 @@ package admobilize.matrix.malosclient;
 
 import android.app.ProgressDialog;
 import android.graphics.drawable.Drawable;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,8 +42,11 @@ public abstract class BaseActivity extends AppCompatActivity {
     public Drawable mOnImage;
     public TextView uv_value;
     public TextView uv_risk;
-    public TextView temp_value;
+    public TextView humi_temp_value;
     public TextView humi_value;
+    public TextView press_value;
+    public TextView press_temp_value;
+    public TextView press_alti_value;
     private JoystickView mJoystickView;
     private ProgressDialog loader;
 
@@ -113,8 +116,11 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         uv_value = (TextView)findViewById(R.id.tv_sensor_uv_percent_value);
         uv_risk = (TextView)findViewById(R.id.tv_sensor_uv_detail);
-        temp_value = (TextView)findViewById(R.id.tv_sensor_temp_value);
-        humi_value = (TextView)findViewById(R.id.tv_sensor_humidity_value);
+        humi_temp_value = (TextView)findViewById(R.id.tv_humidity_temp_value);
+        humi_value = (TextView)findViewById(R.id.tv_humidity_value);
+        press_value = (TextView)findViewById(R.id.tv_pressure_value);
+        press_alti_value = (TextView)findViewById(R.id.tv_pressure_altitude_value);
+        press_temp_value = (TextView)findViewById(R.id.tv_pressure_temp_value);
 
         mOffBackground = getResources().getDrawable(R.drawable.toggle_button_off_holo_dark);
 		mOnBackground = getResources().getDrawable(R.drawable.toggle_button_on_holo_dark);
@@ -123,7 +129,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         mOffImage = getResources().getDrawable(offImageId);
         mOnImage = getResources().getDrawable(onImageId);
 
-        mJoystickView = (JoystickView) findViewById(R.id.joystickView);
+        mJoystickView = (JoystickView) findViewById(R.id.imu_view);
         ColorLEDController ledController = new ColorLEDController((MainActivity) this, 1, getResources(),true);
         ledController.attachToView((ViewGroup) findViewById(R.id.leds1));
 
@@ -185,7 +191,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (loader != null) {
             try {
                 if(msg>0)loader.setMessage(getString(msg));
-                loader.show();
+                if(!loader.isShowing())loader.show();
             } catch (Exception e) {
                 if (DEBUG) Log.d(TAG, "LOADER Exception:");
                 if (DEBUG) e.printStackTrace();

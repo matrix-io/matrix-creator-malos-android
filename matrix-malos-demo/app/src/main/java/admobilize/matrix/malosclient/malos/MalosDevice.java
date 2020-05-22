@@ -8,7 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import admobilize.matrix.malosclient.Config;
-import matrix_malos.Driver;
+import one.matrixio.proto.malos.v1.DriverInfo;
+import one.matrixio.proto.malos.v1.MalosDriverInfo;
 
 /**
  * Created by Antonio Vanegas @hpsaturn on 11/13/16.
@@ -32,13 +33,13 @@ public class MalosDevice {
     private String generateDeviceInfo(byte[] data){
         String info="\n[ipAddress] "+ipAddress;
         try {
-            Driver.MalosDriverInfo driverInfo = Driver.MalosDriverInfo.parseFrom(data);
+            MalosDriverInfo driverInfo = MalosDriverInfo.parseFrom(data);
             info=info+"\n\n=== Features: ===\n";
             info=info+"\n[Port]\t[Delay]\t[Ping]\t[Timeout]\t[DriverName]\n";
-            List<Driver.DriverInfo> features = driverInfo.getInfoList();
-            Iterator<Driver.DriverInfo> it = features.iterator();
+            List<DriverInfo> features = driverInfo.getInfoList();
+            Iterator<DriverInfo> it = features.iterator();
             while (it.hasNext()) {
-                Driver.DriverInfo driver = it.next();
+                DriverInfo driver = it.next();
                 String feature="" +
                         "["+driver.getBasePort()+"]\t"+
                         "["+driver.getDelayBetweenUpdates()+"]\t"+

@@ -1,12 +1,26 @@
+20190219 rev399 (fixed gradle and AndroidTools)
+- fix some fabric issues
+- updated target API
+- new support API to 19
+
+20170713
+- New protobuf namespaces
+
+20161128
+- Fix crash on set manual target on old android devices
+- Fix crash on set background
+- Add pressure sensor (altitude, temp and pressure)
+- Reduce IMU widget and add Mic widget (not functional)
+- Refactor Malos driver package
+
 20161123
-- Fix Matrix connectio before start hardware driver connection
+- Fix Matrix connection before start hardware driver connection
 - Best stop/resume app flow
 - fix some crash bugs
 - Add first version of GPIO updates callback (need Malos master version)
 
 20161118
 - Fix some ZeroMQ thread crash
-
 
 20161118
 - First signed release

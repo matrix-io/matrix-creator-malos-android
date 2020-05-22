@@ -1,36 +1,22 @@
-buildscript {
-    repositories {
-        maven { url 'https://maven.fabric.io/public' }
-    }
 
-    dependencies {
-        classpath 'io.fabric.tools:gradle:1.+'
-    }
-}
 apply plugin: 'com.android.application'
-apply plugin: 'io.fabric'
-
-repositories {
-    maven { url 'https://maven.fabric.io/public' }
-}
-
 apply plugin: 'com.google.protobuf'
+apply plugin: 'io.fabric'
 
 if(project.hasProperty("matrix_malos.signing") && new File(project.property("matrix_malos.signing") + ".gradle").exists()) {
     apply from: project.property("matrix_malos.signing") + ".gradle";
 }
 
-
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.3"
+    compileSdkVersion 28
     defaultConfig {
         applicationId "admobilize.matrix.malosclient"
-        minSdkVersion 15
-        targetSdkVersion 24
-        versionCode 359
-        versionName "1.1"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 426
+        versionName "1.2.3"
+        multiDexEnabled true
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -38,72 +24,80 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    flavorDimensions "default"
+
     productFlavors {
         // Define separate dev and prod product flavors.
         dev {
             // dev utilizes minSDKVersion = 21 to allow the Android gradle plugin
             // to pre-dex each module and produce an APK that can be tested on
             // Android Lollipop without time consuming dex merging processes.
-            minSdkVersion 23
+            minSdkVersion 28
         }
         prod {
-            minSdkVersion 15
+            minSdkVersion 19
             ext.betaDistributionEmailsFilePath="distribution_emails.txt"
             ext.betaDistributionReleaseNotesFilePath="release_notes.txt"
         }
     }
-
     sourceSets {
         main {
             proto {
-
             }
         }
     }
-
-}
-
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.android.support:design:24.2.1'
-    compile 'org.zeromq:jeromq:0.3.5'
-    testCompile 'junit:junit:4.12'
-    compile 'com.google.protobuf:protobuf-lite:3.0.0'
-    compile 'com.iamhabib:easy-preference:1.0.1'
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.5@aar') {
-        transitive = true;
+    configurations.all {
+        resolutionStrategy.force 'com.google.code.findbugs:jsr305:1.3.9'
     }
 }
 
+dependencies {
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'org.zeromq:jeromq:0.3.5'
+    implementation 'io.grpc:grpc-okhttp:1.10.0'
+    implementation 'io.grpc:grpc-protobuf-lite:1.10.0'
+    implementation 'io.grpc:grpc-stub:1.10.0'
+    implementation 'com.iamhabib:easy-preference:1.0.1'
+    implementation 'javax.annotation:javax.annotation-api:1.2'
+
+    protobuf 'com.google.protobuf:protobuf-java:3.4.0'
+
+    implementation ('com.crashlytics.sdk.android:crashlytics:2.10.1@aar') {
+        transitive = true;
+    }
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+}
 
 protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.0.2"
+    }
     plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.1.2'
+        }
         javalite {
-            // The codegen for lite comes as a separate artifact
-            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
+            artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0"
         }
     }
     generateProtoTasks {
         all().each { task ->
             task.plugins {
-                javalite { }
+                javalite {}
+                grpc {
+                    // Options added to --grpc_out
+                    option 'lite'
+                }
             }
         }
     }
     generatedFilesBaseDir = "$projectDir/build/generated"
-
 }
-
-task loadMalosProtos (type: Exec){
-    print "Loading protos definitions.."
-    mkdir('src/main/proto')
-    commandLine 'cp', '../../protocol-buffers/malos/driver.proto', 'src/main/proto/'
-    println "done"
-}
-preBuild.dependsOn loadMalosProtos
-
 

@@ -2,11 +2,12 @@ package admobilize.matrix.malosclient.malos;
 
 import android.os.AsyncTask;
 import android.util.Log;
+
+
 import org.zeromq.ZMQ;
 
 import admobilize.matrix.malosclient.Config;
-
-import static matrix_malos.Driver.*;
+import one.matrixio.proto.malos.v1.DriverConfig;
 
 /**
  * Created by Antonio Vanegas @hpsaturn on 11/10/16.
@@ -25,6 +26,7 @@ public class MalosDrive {
     private ZMQ.Context push_context;
     private ZMQ.Socket push_socket;
     private ZMQ.Socket req_socket;
+
 
     public interface OnSubscriptionCallBack {
         void onReceiveData(String host, byte[] data);
@@ -52,6 +54,10 @@ public class MalosDrive {
 
     public void stop() {
         new ZeroMQstop().execute();
+    }
+
+    public void ping() {
+        push("");
     }
 
     public DriverConfig.Builder getBasicConfig() {
