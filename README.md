@@ -30,7 +30,7 @@ alt="Matrix Creator Android-MALOS demo" width="234" height="180" border="5" /></
 * Please install **Matrix Creator CORE** (MALOS service package) on your RaspberryPi and reboot it:
 
 ```bash
-curl https://apt.matrix.one/doc/apt-key.gpg | sudo apt-key add -
+curl -L https://apt.matrix.one/doc/apt-key.gpg | sudo apt-key add -
 echo "deb https://apt.matrix.one/raspbian $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/matrixlabs.list
 sudo apt update
 sudo apt upgrade
